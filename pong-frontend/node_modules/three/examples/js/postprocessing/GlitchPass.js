@@ -25,7 +25,6 @@
 			/*, deltaTime, maskActive */
 		) {
 
-			if ( renderer.capabilities.isWebGL2 === false ) this.uniforms[ 'tDisp' ].value.format = THREE.LuminanceFormat;
 			this.uniforms[ 'tDiffuse' ].value = readBuffer.texture;
 			this.uniforms[ 'seed' ].value = Math.random(); //default seeding
 
@@ -82,19 +81,19 @@
 
 		generateHeightmap( dt_size ) {
 
-			const data_arr = new Float32Array( dt_size * dt_size );
+			const data_arr = new Float32Array( dt_size * dt_size * 3 );
 			const length = dt_size * dt_size;
 
 			for ( let i = 0; i < length; i ++ ) {
 
 				const val = THREE.MathUtils.randFloat( 0, 1 );
-				data_arr[ i ] = val;
+				data_arr[ i * 3 + 0 ] = val;
+				data_arr[ i * 3 + 1 ] = val;
+				data_arr[ i * 3 + 2 ] = val;
 
 			}
 
-			const texture = new THREE.DataTexture( data_arr, dt_size, dt_size, THREE.RedFormat, THREE.FloatType );
-			texture.needsUpdate = true;
-			return texture;
+			return new THREE.DataTexture( data_arr, dt_size, dt_size, THREE.RGBFormat, THREE.FloatType );
 
 		}
 

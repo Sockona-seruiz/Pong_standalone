@@ -225,7 +225,6 @@ gltfloader.load("SunNew.gltf", function (gltf: any) {
   gltf.scene.traverse(function (child: any) {
     if (child instanceof THREE.Mesh) {
       child.material.emissiveIntensity = 0.3;
-      child.position.set(0, 11, -config.arena_h_2 - 3);
     }
   });
   SunMesh = gltf.scene;

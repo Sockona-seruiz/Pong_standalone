@@ -1276,7 +1276,7 @@ class ColladaLoader extends Loader {
 						break;
 					case 'transparent':
 						data[ child.nodeName ] = {
-							opaque: child.hasAttribute( 'opaque' ) ? child.getAttribute( 'opaque' ) : 'A_ONE',
+							opaque: child.getAttribute( 'opaque' ),
 							data: parseEffectParameter( child )
 						};
 						break;
@@ -1737,6 +1737,7 @@ class ColladaLoader extends Loader {
 							material.opacity = color[ 0 ] * transparency.float;
 							break;
 						default:
+							material.opacity = 1 - transparency.float;
 							console.warn( 'THREE.ColladaLoader: Invalid opaque type "%s" of transparent tag.', transparent.opaque );
 
 					}

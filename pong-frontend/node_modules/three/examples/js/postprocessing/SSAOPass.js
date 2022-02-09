@@ -23,17 +23,25 @@
 			this.generateRandomKernelRotations(); // beauty render target
 
 			const depthTexture = new THREE.DepthTexture();
-			depthTexture.format = THREE.DepthStencilFormat;
-			depthTexture.type = THREE.UnsignedInt248Type;
-			this.beautyRenderTarget = new THREE.WebGLRenderTarget( this.width, this.height ); // normal render target with depth buffer
+			depthTexture.type = THREE.UnsignedShortType;
+			this.beautyRenderTarget = new THREE.WebGLRenderTarget( this.width, this.height, {
+				minFilter: THREE.LinearFilter,
+				magFilter: THREE.LinearFilter,
+				format: THREE.RGBAFormat
+			} ); // normal render target with depth buffer
 
 			this.normalRenderTarget = new THREE.WebGLRenderTarget( this.width, this.height, {
 				minFilter: THREE.NearestFilter,
 				magFilter: THREE.NearestFilter,
+				format: THREE.RGBAFormat,
 				depthTexture: depthTexture
 			} ); // ssao render target
 
-			this.ssaoRenderTarget = new THREE.WebGLRenderTarget( this.width, this.height );
+			this.ssaoRenderTarget = new THREE.WebGLRenderTarget( this.width, this.height, {
+				minFilter: THREE.LinearFilter,
+				magFilter: THREE.LinearFilter,
+				format: THREE.RGBAFormat
+			} );
 			this.blurRenderTarget = this.ssaoRenderTarget.clone(); // ssao material
 
 			if ( THREE.SSAOShader === undefined ) {
@@ -123,8 +131,7 @@
 			/*, readBuffer, deltaTime, maskActive */
 		) {
 
-			if ( renderer.capabilities.isWebGL2 === false ) this.noiseTexture.format = THREE.LuminanceFormat; // render beauty
-
+			// render beauty
 			renderer.setRenderTarget( this.beautyRenderTarget );
 			renderer.clear();
 			renderer.render( this.scene, this.camera ); // render normals and depth (honor only meshes, points and lines do not contribute to SSAO)
@@ -290,21 +297,25 @@
 
 			const simplex = new THREE.SimplexNoise();
 			const size = width * height;
-			const data = new Float32Array( size );
+			const data = new Float32Array( size * 4 );
 
 			for ( let i = 0; i < size; i ++ ) {
 
+				const stride = i * 4;
 				const x = Math.random() * 2 - 1;
 				const y = Math.random() * 2 - 1;
 				const z = 0;
-				data[ i ] = simplex.noise3d( x, y, z );
+				const noise = simplex.noise3d( x, y, z );
+				data[ stride ] = noise;
+				data[ stride + 1 ] = noise;
+				data[ stride + 2 ] = noise;
+				data[ stride + 3 ] = 1;
 
 			}
 
-			this.noiseTexture = new THREE.DataTexture( data, width, height, THREE.RedFormat, THREE.FloatType );
+			this.noiseTexture = new THREE.DataTexture( data, width, height, THREE.RGBAFormat, THREE.FloatType );
 			this.noiseTexture.wrapS = THREE.RepeatWrapping;
 			this.noiseTexture.wrapT = THREE.RepeatWrapping;
-			this.noiseTexture.needsUpdate = true;
 
 		}
 

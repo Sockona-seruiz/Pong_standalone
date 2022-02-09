@@ -7,11 +7,17 @@
 			super(); // render targets
 
 			this.edgesRT = new THREE.WebGLRenderTarget( width, height, {
-				depthBuffer: false
+				depthBuffer: false,
+				generateMipmaps: false,
+				minFilter: THREE.LinearFilter,
+				format: THREE.RGBFormat
 			} );
 			this.edgesRT.texture.name = 'SMAAPass.edges';
 			this.weightsRT = new THREE.WebGLRenderTarget( width, height, {
-				depthBuffer: false
+				depthBuffer: false,
+				generateMipmaps: false,
+				minFilter: THREE.LinearFilter,
+				format: THREE.RGBAFormat
 			} );
 			this.weightsRT.texture.name = 'SMAAPass.weights'; // textures
 
@@ -29,6 +35,7 @@
 			this.areaTexture = new THREE.Texture();
 			this.areaTexture.name = 'SMAAPass.area';
 			this.areaTexture.image = areaTextureImage;
+			this.areaTexture.format = THREE.RGBFormat;
 			this.areaTexture.minFilter = THREE.LinearFilter;
 			this.areaTexture.generateMipmaps = false;
 			this.areaTexture.flipY = false;

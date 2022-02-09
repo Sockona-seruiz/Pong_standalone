@@ -140,7 +140,7 @@ class TDSLoader extends Loader {
 
 				} else {
 
-					this.debugMessage( 'Unknown main chunk: ' + next.hexId );
+					this.debugMessage( 'Unknown main chunk: ' + next.hexId);
 
 				}
 
@@ -218,9 +218,7 @@ class TDSLoader extends Loader {
 				const mesh = this.readMesh( next );
 				mesh.name = name;
 				this.meshes.push( mesh );
-
 			} else {
-
 				this.debugMessage( 'Unknown named object chunk: ' + next.hexId );
 
 			}
@@ -241,7 +239,7 @@ class TDSLoader extends Loader {
 	readMaterialEntry( chunk, path ) {
 
 		let next = chunk.readChunk();
-		const material = new MeshPhongMaterial();
+		let material = new MeshPhongMaterial();
 
 		while ( next ) {
 
@@ -487,7 +485,7 @@ class TDSLoader extends Loader {
 		let materialIndex = 0;
 		let start = 0;
 
-		while ( ! chunk.endOfChunk ) {
+		while ( !chunk.endOfChunk ) {
 
 			const subchunk = chunk.readChunk( );
 
@@ -698,13 +696,11 @@ class TDSLoader extends Loader {
 		}
 
 	}
-
 }
 
 
 /** Read data/sub-chunks from chunk */
 class Chunk {
-
 	/**
 	 * Create a new chunk
 	 *
@@ -713,8 +709,7 @@ class Chunk {
 	 * @param {Number} position in data.
 	 * @param {Function} debugMessage logging callback.
 	 */
-	constructor( data, position, debugMessage ) {
-
+	constructor(data, position, debugMessage) {
 		this.data = data;
 		// the offset to the begin of this chunk
 		this.offset = position;
@@ -722,22 +717,17 @@ class Chunk {
 		this.position = position;
 		this.debugMessage = debugMessage;
 
-		if ( this.debugMessage instanceof Function ) {
-
-			this.debugMessage = function () {};
-
+		if (this.debugMessage instanceof Function) {
+			this.debugMessage = function() {};
 		}
 
 		this.id = this.readWord();
 		this.size = this.readDWord();
 		this.end = this.offset + this.size;
 
-		if ( this.end > data.byteLength ) {
-
+		if (this.end > data.byteLength) {
 			this.debugMessage( 'Bad chunk size for chunk at ' + position );
-
 		}
-
 	}
 
 	/**
@@ -746,22 +736,18 @@ class Chunk {
 	 * @method readChunk
 	 * @return {Chunk | null} next sub chunk
 	 */
-	readChunk() {
+	readChunk () {
 
 		if ( this.endOfChunk ) {
-
 			return null;
-
 		}
 
 		try {
-
-			const next = new Chunk( this.data, this.position, this.debugMessage );
+			let next = new Chunk( this.data, this.position, this.debugMessage );
 			this.position += next.size;
 			return next;
 
 		}	catch ( e ) {
-
 			this.debugMessage( 'Unable to read chunk at ' + this.position );
 			return null;
 
@@ -776,15 +762,11 @@ class Chunk {
 	 * @return {String} hex-string of id
 	 */
 	get hexId() {
-
 		return this.id.toString( 16 );
-
 	}
 
 	get endOfChunk() {
-
 		return this.position >= this.end;
-
 	}
 
 	/**
@@ -891,14 +873,11 @@ class Chunk {
 		let s = '';
 		let c = this.readByte();
 		while ( c ) {
-
 			s += String.fromCharCode( c );
 			c = this.readByte();
-
 		}
 
 		return s;
-
 	}
 
 }
