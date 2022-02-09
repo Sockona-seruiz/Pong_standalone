@@ -12,12 +12,15 @@ import { FontLoader } from "three/examples/jsm/loaders/FontLoader";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry";
 import TextSprite from "@seregpie/three.text-sprite";
 
+import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min';
+
 import { init_score } from "./score_init";
 import { updateScore } from "./score";
 import { init_paddles } from "./paddles_init";
 import { init_ball } from "./ball_init";
 import { init_arena } from "./arena_init";
 import { init_audio } from "./audio_init";
+import { updateCurrentSong } from './audio_init';
 import { init_plane } from "./plane_init";
 import { moveSun } from "./update_sun";
 import { updateAudioVisualizer } from "./update_audio";
@@ -53,6 +56,35 @@ const user_to_watch = localStorage.getItem("user");
 console.log(user_to_watch);
 
 if (user_to_watch != null) UserId = localStorage.getItem("spect");
+
+let buttons;
+let default_buttons = {
+	GameMode: 'Normal Game',
+	SongToogle: true,
+	Song: 'Zed Ignite',
+	LaunchGame: false,
+}
+
+setupGui();
+
+function setupGui() {
+
+	buttons = {
+		GameMode: 'Normal Game',
+		SongToogle: true,
+		Song: 'Zed Ignite',
+		LaunchGame: false,
+	};
+
+	const gui = new GUI();
+	gui.add( buttons, 'GameMode', [ 'Normal Game', 'Bonus Game' ] ).name( 'Game Mode' ).onChange( console.log("Gamemode") );
+	gui.add( buttons, 'SongToogle' ).name( 'Toogle song' ).onChange( console.log("Song " + buttons.SongToogle) );
+	gui.add( buttons, 'Song', ['Zed Ignite', 'Ennemi'] ).name('Select Song' ).onChange( console.log("Change sont to : " + buttons.song) );
+	gui.add( buttons, 'LaunchGame' ).name( 'Launch Matchmaking' ).onChange( console.log("Launch Game") );
+
+}
+
+
 
 var config = {
   arena_w: 100,
@@ -656,6 +688,18 @@ async function ft_ending_fireworks(pos: any, color: any) {
 
 //The render loop ======
 const animate = function () {
+
+	if (buttons.SongToogle != default_buttons.SongToogle || buttons.Song != default_buttons.Song)
+	{
+		let change_track =  false;
+		if (buttons.Song != default_buttons.Song)
+			change_track = true;
+		default_buttons.SongToogle = buttons.SongToogle;
+		default_buttons.Song = buttons.Song;
+		console.log("Update Song");
+		updateCurrentSong(audio_s, buttons.SongToogle, buttons.Song, change_track);
+	}
+
   canResetCam = true;
   requestAnimationFrame(animate);
 

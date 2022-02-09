@@ -1,17 +1,6 @@
 import * as THREE from 'three'
 
-export function init_audio(scene: THREE.Scene, BLOOM_SCENE: number, config: {
-    arena_w: number;
-    arena_w_2: number;
-    arena_h: number;
-    arena_h_2: number;
-    arena_size: number;
-    paddle_w: number;
-    paddle_h: number;
-    paddle_h_2: number;
-})
-{
-	var audiolist = [];
+var audiolist = [];
 	// audiolist.unshift("../sounds/far-cry-3-blood-dragon-ost-power-core-track-07.mp3");
 	// audiolist.unshift('../sounds/dryskill-burnout-dubstep-synthwave.mp3');
 	// audiolist.unshift('../sounds/far-cry-3-blood-dragon-ost-omega-force-track-16.mp3');
@@ -26,22 +15,47 @@ export function init_audio(scene: THREE.Scene, BLOOM_SCENE: number, config: {
 	// audiolist.unshift('../sounds/dirty-androids-midnight-lady.mp3');
 
 	// audiolist.unshift('./sounds/main_song.mp3');
-	// audiolist.unshift('./sounds/enemy.mp3');
 	// audiolist.unshift('./sounds/post-malone-swae-lee-sunflower-spider-man-into-the-spider-verse.mp3');
 
-	audiolist.unshift('./sounds/Ignite.mp3');
+	audiolist[0] = './sounds/Ignite.mp3';
+	audiolist[1] = './sounds/enemy.mp3';
 
+export function init_audio(scene: THREE.Scene, BLOOM_SCENE: number, config: {
+    arena_w: number;
+    arena_w_2: number;
+    arena_h: number;
+    arena_h_2: number;
+    arena_size: number;
+    paddle_w: number;
+    paddle_h: number;
+    paddle_h_2: number;
+})
+{
 	const fftSize = 32;
 
 	const audioListener = new THREE.AudioListener();
 	const audio = new THREE.Audio(audioListener);
 
-	const audioLoader = new THREE.AudioLoader();
-	audioLoader.load(audiolist[Math.floor(Math.random() * audiolist.length)], (buffer: AudioBuffer) => {
+	const audioLoader_0 = new THREE.AudioLoader();
+	audioLoader_0.load(audiolist[0], (buffer: AudioBuffer) => {
 		audio.setBuffer(buffer);
 		audio.setLoop(true);
 		audio.play();
 	});
+
+	const audioLoader_1 = new THREE.AudioLoader();
+	audioLoader_1.load(audiolist[1], (buffer: AudioBuffer) => {
+		audio.setBuffer(buffer);
+		audio.setLoop(true);
+		audio.pause();
+	});
+
+	// const audioLoader = new THREE.AudioLoader();
+	// audioLoader.load(audiolist[Math.floor(Math.random() * audiolist.length)], (buffer: AudioBuffer) => {
+	// 	audio.setBuffer(buffer);
+	// 	audio.setLoop(true);
+	// 	audio.play();
+	// });
 
 	const analyser = new THREE.AudioAnalyser(audio, fftSize);
 
@@ -99,6 +113,9 @@ export function init_audio(scene: THREE.Scene, BLOOM_SCENE: number, config: {
 		AudioMeshArray_OL : AudioMeshArray_outline_Left,
 		AudioMeshArray_OR : AudioMeshArray_outline_Right,
 
+		audioLoader: audioLoader_0,
+		THREE_Audio: audio,
+
 		analyser : analyser,
 		avgFreq : averageFreq,
 		FrqData : data,
@@ -119,4 +136,33 @@ export function init_audio(scene: THREE.Scene, BLOOM_SCENE: number, config: {
 		upperAvgFr : 0
 	}
 	return (audio_s);
+}
+
+export function updateCurrentSong(audio_s:any, SongToogle: boolean, Songname:string, change_track: boolean)
+{
+	if (change_track == true)
+	{
+		audio_s.THREE_Audio.stop();
+		if (Songname == 'Zed Ignite')
+		{
+			audio_s.audioLoader.load(audiolist[0], (buffer: AudioBuffer) => {
+				audio_s.THREE_Audio.setBuffer(buffer);
+				audio_s.THREE_Audio.setLoop(true);
+				audio_s.THREE_Audio.play();
+			});
+		}
+		else
+		{
+			audio_s.audioLoader.load(audiolist[1], (buffer: AudioBuffer) => {
+				audio_s.THREE_Audio.setBuffer(buffer);
+				audio_s.THREE_Audio.setLoop(true);
+				audio_s.THREE_Audio.play();
+			});
+		}
+		return ;
+	}
+	else if (SongToogle == false)
+		audio_s.THREE_Audio.pause();
+	else
+		audio_s.THREE_Audio.play();
 }
