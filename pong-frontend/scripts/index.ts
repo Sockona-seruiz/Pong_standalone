@@ -61,8 +61,8 @@ let buttons;
 let default_buttons = {
 	GameMode: 'Normal Game',
 	SongToogle: true,
-	Song: 'Zed Ignite',
-	LaunchGame: false,
+	Song: 'Flyday Chinatown',
+	LaunchGame: false
 }
 
 setupGui();
@@ -72,14 +72,14 @@ function setupGui() {
 	buttons = {
 		GameMode: 'Normal Game',
 		SongToogle: true,
-		Song: 'Zed Ignite',
-		LaunchGame: false,
+		Song: 'Flyday Chinatown',
+		LaunchGame: false
 	};
 
 	const gui = new GUI();
 	gui.add( buttons, 'GameMode', [ 'Normal Game', 'Bonus Game' ] ).name( 'Game Mode' ).onChange( console.log("Gamemode") );
 	gui.add( buttons, 'SongToogle' ).name( 'Toogle song' ).onChange( console.log("Song " + buttons.SongToogle) );
-	gui.add( buttons, 'Song', ['Zed Ignite', 'Ennemi'] ).name('Select Song' ).onChange( console.log("Change sont to : " + buttons.song) );
+	gui.add( buttons, 'Song', ['Flyday Chinatown', 'Soda City Funk'] ).name('Select Song' ).onChange( console.log("Change sont to : " + buttons.song) );
 	gui.add( buttons, 'LaunchGame' ).name( 'Launch Matchmaking' ).onChange( console.log("Launch Game") );
 
 }

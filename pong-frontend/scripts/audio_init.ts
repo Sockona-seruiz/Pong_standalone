@@ -17,8 +17,8 @@ var audiolist = [];
 	// audiolist.unshift('./sounds/main_song.mp3');
 	// audiolist.unshift('./sounds/post-malone-swae-lee-sunflower-spider-man-into-the-spider-verse.mp3');
 
-	audiolist[0] = './sounds/Ignite.mp3';
-	audiolist[1] = './sounds/enemy.mp3';
+	audiolist[0] = './sounds/flyday-chinatown.mp3';
+	audiolist[1] = './sounds/soda-city-funk.mp3';
 
 export function init_audio(scene: THREE.Scene, BLOOM_SCENE: number, config: {
     arena_w: number;
@@ -143,21 +143,43 @@ export function updateCurrentSong(audio_s:any, SongToogle: boolean, Songname:str
 	if (change_track == true)
 	{
 		audio_s.THREE_Audio.stop();
-		if (Songname == 'Zed Ignite')
+		if (Songname == 'Flyday Chinatown')
 		{
+			if (SongToogle == false)
+			{
+				audio_s.audioLoader.load(audiolist[0], (buffer: AudioBuffer) => {
+					audio_s.THREE_Audio.setBuffer(buffer);
+					audio_s.THREE_Audio.setLoop(true);
+					audio_s.THREE_Audio.pause();
+				});
+			}
+			else
+			{
 			audio_s.audioLoader.load(audiolist[0], (buffer: AudioBuffer) => {
 				audio_s.THREE_Audio.setBuffer(buffer);
 				audio_s.THREE_Audio.setLoop(true);
 				audio_s.THREE_Audio.play();
 			});
+			}
 		}
 		else
 		{
-			audio_s.audioLoader.load(audiolist[1], (buffer: AudioBuffer) => {
-				audio_s.THREE_Audio.setBuffer(buffer);
-				audio_s.THREE_Audio.setLoop(true);
-				audio_s.THREE_Audio.play();
-			});
+			if (SongToogle == false)
+			{
+				audio_s.audioLoader.load(audiolist[1], (buffer: AudioBuffer) => {
+					audio_s.THREE_Audio.setBuffer(buffer);
+					audio_s.THREE_Audio.setLoop(true);
+					audio_s.THREE_Audio.pause();
+				});
+			}
+			else
+			{
+				audio_s.audioLoader.load(audiolist[1], (buffer: AudioBuffer) => {
+					audio_s.THREE_Audio.setBuffer(buffer);
+					audio_s.THREE_Audio.setLoop(true);
+					audio_s.THREE_Audio.play();
+				});
+			}
 		}
 		return ;
 	}
