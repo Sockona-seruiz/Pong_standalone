@@ -57,35 +57,6 @@ console.log(user_to_watch);
 
 if (user_to_watch != null) UserId = localStorage.getItem("spect");
 
-let buttons;
-let default_buttons = {
-	GameMode: 'Normal Game',
-	SongToogle: true,
-	Song: 'Flyday Chinatown',
-	LaunchGame: false
-}
-
-setupGui();
-
-function setupGui() {
-
-	buttons = {
-		GameMode: 'Normal Game',
-		SongToogle: true,
-		Song: 'Flyday Chinatown',
-		LaunchGame: false
-	};
-
-	const gui = new GUI();
-	gui.add( buttons, 'GameMode', [ 'Normal Game', 'Bonus Game' ] ).name( 'Game Mode' ).onChange( console.log("Gamemode") );
-	gui.add( buttons, 'SongToogle' ).name( 'Toogle song' ).onChange( console.log("Song " + buttons.SongToogle) );
-	gui.add( buttons, 'Song', ['Flyday Chinatown', 'Soda City Funk'] ).name('Select Song' ).onChange( console.log("Change sont to : " + buttons.song) );
-	gui.add( buttons, 'LaunchGame' ).name( 'Launch Matchmaking' ).onChange( console.log("Launch Game") );
-
-}
-
-
-
 var config = {
   arena_w: 100,
   arena_w_2: 0,
@@ -122,6 +93,43 @@ socket.on("test", (i: number) => {
 config.paddle_h_2 = config.paddle_h / 2;
 config.arena_h_2 = config.arena_h / 2;
 config.arena_w_2 = config.arena_w / 2;
+
+
+//Config Ui
+
+
+let buttons;
+let default_buttons = {
+	Nickname: "user",
+	GameMode: 'Normal Game',
+	SongToogle: true,
+	Song: 'Flyday Chinatown',
+	LaunchGame: false
+}
+
+setupGui();
+
+function setupGui() {
+
+	buttons = {
+		Nickname: "user",
+		GameMode: 'Normal Game',
+		SongToogle: true,
+		Song: 'Flyday Chinatown',
+		LaunchGame: false
+	};
+
+	const gui = new GUI();
+	gui.add( buttons, "Nickname").onFinishChange(function (value) {buttons.Nickname = value;});
+	gui.add( buttons, 'GameMode', [ 'Normal Game', 'Bonus Game' ] ).name( 'Game Mode' ).onChange( console.log("Gamemode") );
+	gui.add( buttons, 'SongToogle' ).name( 'Toogle song' ).onChange( console.log("Song " + buttons.SongToogle) );
+	gui.add( buttons, 'Song', ['Flyday Chinatown', 'Soda City Funk'] ).name('Select Song' ).onChange( console.log("Change sont to : " + buttons.song) );
+	gui.add( buttons, 'LaunchGame' ).name( 'Launch Matchmaking' ).onChange( function(value){ if (value == true) Launch_Game(buttons) });
+
+}
+
+
+
 
 var canResetCam = false;
 
@@ -389,20 +397,23 @@ var vs_text = new TextSprite({
 vs_text.position.set(0, -5, 29);
 scene.add(vs_text);
 
-socket.emit("launch_game", {
-  spec: user_to_watch,
-  mode: GameMode,
-  login: UserId,
-  username: username,
-  duel: DuelId,
-  plx: -(config.arena_w / 2 - 5),
-  prx: config.arena_w / 2 - 5,
-  ph_2: config.paddle_h_2,
-  at: -config.arena_h_2 + 1,
-  ab: config.arena_h_2 - 1,
-  al: -config.arena_w_2 + 1,
-  ar: config.arena_w_2 - 1,
-});
+function Launch_Game(buttons: any)
+{
+	socket.emit("launch_game", {
+	  spec: user_to_watch,
+	  mode: buttons.GameMode,
+	  login: buttons.Nickname,
+	  username: buttons.Nickname,
+	  duel: DuelId,
+	  plx: -(config.arena_w / 2 - 5),
+	  prx: config.arena_w / 2 - 5,
+	  ph_2: config.paddle_h_2,
+	  at: -config.arena_h_2 + 1,
+	  ab: config.arena_h_2 - 1,
+	  al: -config.arena_w_2 + 1,
+	  ar: config.arena_w_2 - 1,
+	});
+};
 
 // Right_user.text = "";
 
