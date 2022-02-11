@@ -52,10 +52,10 @@ const DuelId = localStorage.getItem("duel");
 const username = localStorage.getItem("username");
 console.log("mode : " + GameMode + " id : " + UserId + " duel : " + DuelId);
 
-const user_to_watch = localStorage.getItem("user");
+var user_to_watch = "";
 console.log(user_to_watch);
 
-if (user_to_watch != null) UserId = localStorage.getItem("spect");
+// if (user_to_watch != null) UserId = localStorage.getItem("spect");
 
 var config = {
   arena_w: 100,
@@ -69,26 +69,9 @@ var config = {
   paddle_h_2: 0,
 };
 
-// if (GameMode == "1") //aka bonus game
-// {
-// 	config.arena_w = 110;
-// 	config.paddle_h = 8;
-// 	config.arena_h = 45;
-// }
-
 socket.on("test", (i: number) => {
   console.log("front sucesfully called");
 });
-
-// socket.on("change_mode", (i: number) =>
-// {
-// 	config.arena_w = 110;
-// 	config.paddle_h = 8;
-// 	config.arena_h = 45;
-
-// 	arena_s.top.remove();
-// 	arena_s.bot.remove();
-// });
 
 config.paddle_h_2 = config.paddle_h / 2;
 config.arena_h_2 = config.arena_h / 2;
@@ -139,21 +122,32 @@ let buttons = {
 	userLabel: ["user"],
 };
 
-var html_buttons = document.getElementsByTagName('button');
+// var html_buttons = document.getElementsByTagName('button');
 
-for (let i = 0; i < html_buttons.length; i++)
-{
-  html_buttons[i].addEventListener('click', onButtonClick, false);
-};
+// for (let i = 0; i < html_buttons.length; i++)
+// {
+//   html_buttons[i].addEventListener('click', onButtonClick, false);
+// };
 
-function onButtonClick(event)
+
+var refresh_spec_buttons = document.getElementById("refresh_spec");
+var join_spec_buttons = document.getElementById("launch_spec");
+
+refresh_spec_buttons.addEventListener('click', get_in_game_user_list, false);
+join_spec_buttons.addEventListener('click', launch_spectate, false);
+
+
+function launch_spectate()
 {
-	console.log("Button pressed !");
 	var SpecSelect: any = document.getElementById("spectate-select");
-	var selectedText = SpecSelect.options[SpecSelect.selectedIndex].text;
+	var spec_nickname = SpecSelect.options[SpecSelect.selectedIndex].text;
 
-	get_in_game_user_list ();
-	console.log(selectedText);
+	if (SpecSelect.options[SpecSelect.selectedIndex].value != "")
+	{
+		console.log("You are willing to watch " + spec_nickname);
+		user_to_watch = spec_nickname;
+		Launch_Game(buttons);
+	}
 }
 
 function add_to_select(selectobject: any, value: string, id: string)

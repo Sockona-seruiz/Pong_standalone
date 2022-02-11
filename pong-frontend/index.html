@@ -6,7 +6,7 @@
 <!-- By: seruiz <seruiz@student.42lyon.fr>          +#+  +:+       +#+       -->
 <!--                                              +#+#+#+#+#+   +#+          -->
 <!-- Created: 2021/09/10 17:11:31 by seruiz            #+#    #+#            -->
-<!-- Updated: 2022/02/11 12:18:06 by seruiz           ###   ########lyon.fr  -->
+<!-- Updated: 2022/02/11 13:14:49 by seruiz           ###   ########lyon.fr  -->
 <!--                                                                         -->
 <!-- *********************************************************************** -->
 
@@ -27,11 +27,15 @@
 
 
 		<div style="width:100%;height:50px;text-align: center; color:white;" class="ui">
-		<button id="test" class="ui">Test</button>
 
-		<select name="spectate" id="spectate-select">
-			<option value="">--Please choose someone to spectate--</option>
-		</select>
+		<button class="refresh_spec" id="refresh_spec" class="ui">Refresh List</button>
+		<element class="spec_select">
+		<select name="spectate" id="spectate-select"></select>
+		</element>
+		<button class="launch_spec" id="launch_spec" class="ui">Spectate</button>
+
+		<!-- <button id="refresh_User" class="ui">Refresh List</button>
+		<select name="duel" id="duel-select"></select> -->
 
 		</div>
 

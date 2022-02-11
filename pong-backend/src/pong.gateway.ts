@@ -225,10 +225,11 @@ export class PongGateway
 		//Won't be used here I think (maybe send a list to client with all games idk then show it in the ui)
 		//Will be used config.spec == nickname to spectate
 		console.log(config.spec);
-		if (config.spec != null)
+		if (config.spec != "")
 		{
-			console.log(client.id + " is willing to watch a game ");
-			let spec_sock_id = nick_socket.get(config.spec).id;
+			console.log(client.id + " is willing to watch |" + config.spec + "|");
+			let spec_sock_id = nick_socket.get(config.spec);
+			console.log("spec_sock_id = " + spec_sock_id);
 
 			// client.join(socket_id.get(config.spec));
 			client.join(socket_infos.get(spec_sock_id).room);
@@ -625,6 +626,7 @@ export class PongGateway
 				if (positions.ball_pos_x <= positions.arena_left_pos)
 				{
 					positions.RightScore += 1;
+					match_infos.player_1_score = positions.RightScore;
 					if (positions.RightScore == score_limit)
 						win = 1;
 					this.server.to(players[0].id).emit("update_score", {ls: positions.LeftScore, rs: positions.RightScore});
@@ -636,6 +638,7 @@ export class PongGateway
 				else if (positions.ball_pos_x >= positions.arena_right_pos)
 				{
 					positions.LeftScore += 1;
+					match_infos.player_0_score = positions.LeftScore;
 					if (positions.LeftScore == score_limit)
 						win = 0;
 					this.server.to(players[0].id).emit("update_score", {ls: positions.LeftScore, rs: positions.RightScore});
