@@ -167,6 +167,29 @@ export class PongGateway
 		return;
 	};
 
+	@SubscribeMessage('QuitMactchmaking')
+	async quit_Matchmaking(client: Socket)
+	{
+		let index_of_client_0: number;
+		let index_of_client_1: number;
+
+		index_of_client_0 = users_in_matchmaking_0.indexOf(client);
+		index_of_client_1 = users_in_matchmaking_1.indexOf(client);
+
+		if (index_of_client_0 != -1)
+		{
+			users_in_matchmaking_0.splice(index_of_client_0, 1);
+			console.log(client.id + " left classic matchmaking");
+		}
+		else if (index_of_client_1 != -1)
+		{
+			users_in_matchmaking_1.splice(index_of_client_1, 1);
+			console.log(client.id + " left bonus matchmaking");
+		}
+		else
+			console.log(client.id + " was not in matchmaking");
+	};
+
 	@SubscribeMessage('get_player_list')
 	async get_player_list(client: Socket)
 	{
@@ -182,31 +205,31 @@ export class PongGateway
 			i++;
 		}
 		client.emit("send_user_list", users);
-	}
+	};
 
 	@SubscribeMessage('send_username')
 	async get_username(client: Socket, user_id)
 	{
 		console.log("USER ID = " + user_id);
-	}
+	};
 
 	@SubscribeMessage('up_paddle')
 	async up_paddle(client: Socket)
 	{
 		users_key_status.set(client.id, 1);
-	}
+	};
 
 	@SubscribeMessage('down_paddle')
 	async down_paddle(client: Socket)
 	{
 		users_key_status.set(client.id, -1);
-	}
+	};
 
 	@SubscribeMessage('stop_paddle')
 	async stop_paddle(client: Socket)
 	{
 		users_key_status.set(client.id, 0);
-	}
+	};
 
 	@SubscribeMessage('launch_game')
 	async launch_game(client: Socket, config)

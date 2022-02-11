@@ -179,7 +179,17 @@ function setupGui() {
 	gui.add( buttons, 'GameMode', [ 'Normal Game', 'Bonus Game' ] ).name( 'Game Mode' ).onChange( console.log("Gamemode") );
 	gui.add( buttons, 'SongToogle' ).name( 'Toogle song' ).onChange( console.log("Song " + buttons.SongToogle) );
 	gui.add( buttons, 'Song', ['Flyday Chinatown', 'Soda City Funk'] ).name('Select Song' ).onChange( console.log("Change sont to : " + buttons.Song) );
-	gui.add( buttons, 'LaunchGame' ).name( 'Launch Matchmaking' ).onChange( function(value){ if (value == true) Launch_Game(buttons) });
+	gui.add( buttons, 'LaunchGame' ).name( 'Launch Matchmaking' ).onChange(
+		function(value){
+			if (value == true)
+			{
+				Launch_Game(buttons);
+			}
+			else if (value == false)
+			{
+				socket.emit('QuitMactchmaking');
+			} 
+		});
 }
 
 var canResetCam = false;
