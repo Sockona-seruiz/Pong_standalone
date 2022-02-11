@@ -94,42 +94,99 @@ config.paddle_h_2 = config.paddle_h / 2;
 config.arena_h_2 = config.arena_h / 2;
 config.arena_w_2 = config.arena_w / 2;
 
+//Request in game players list
+var users_in_game: string [];
+users_in_game = [];
+
+socket.on("send_user_list", (users: any) => {
+	let i: number = 0;
+	if (users != null)
+	{
+			clear_select(document.getElementById("spectate-select"));
+			add_to_select(document.getElementById("spectate-select"), "", "--Please choose someone to spectate--");
+			while (users[i])
+			{
+				console.log("users : " + users[i]);
+				add_to_select(document.getElementById("spectate-select"), users[i], users[i]);
+				users_in_game[i] = users[i];
+				i++;
+			}
+	}
+});
+
+function get_in_game_user_list ()
+{
+	socket.emit("get_player_list");
+};
 
 //Config Ui
 
 
-let buttons;
 let default_buttons = {
 	Nickname: "user",
 	GameMode: 'Normal Game',
 	SongToogle: true,
 	Song: 'Flyday Chinatown',
-	LaunchGame: false
+	LaunchGame: false,
 }
 
+let buttons = {
+	Nickname: "user",
+	GameMode: 'Normal Game',
+	SongToogle: true,
+	Song: 'Flyday Chinatown',
+	LaunchGame: false,
+	userLabel: ["user"],
+};
+
+var html_buttons = document.getElementsByTagName('button');
+
+for (let i = 0; i < html_buttons.length; i++)
+{
+  html_buttons[i].addEventListener('click', onButtonClick, false);
+};
+
+function onButtonClick(event)
+{
+	console.log("Button pressed !");
+	var SpecSelect: any = document.getElementById("spectate-select");
+	var selectedText = SpecSelect.options[SpecSelect.selectedIndex].text;
+
+	get_in_game_user_list ();
+	console.log(selectedText);
+}
+
+function add_to_select(selectobject: any, value: string, id: string)
+{
+	var option = document.createElement('option');
+	option.value = value;
+	option.innerText = id;
+
+	selectobject.appendChild(option);
+};
+
+function clear_select(selectobject: any)
+{
+	selectobject.selectedIndex = 0;
+	var j, L = selectobject.options.length - 1;
+	for(j = L; j >= 0; j--) {
+		selectobject.remove(j);
+	}
+}
+
+get_in_game_user_list ();
+
+const gui = new GUI();
 setupGui();
 
 function setupGui() {
 
-	buttons = {
-		Nickname: "user",
-		GameMode: 'Normal Game',
-		SongToogle: true,
-		Song: 'Flyday Chinatown',
-		LaunchGame: false
-	};
-
-	const gui = new GUI();
 	gui.add( buttons, "Nickname").onFinishChange(function (value) {buttons.Nickname = value;});
 	gui.add( buttons, 'GameMode', [ 'Normal Game', 'Bonus Game' ] ).name( 'Game Mode' ).onChange( console.log("Gamemode") );
 	gui.add( buttons, 'SongToogle' ).name( 'Toogle song' ).onChange( console.log("Song " + buttons.SongToogle) );
-	gui.add( buttons, 'Song', ['Flyday Chinatown', 'Soda City Funk'] ).name('Select Song' ).onChange( console.log("Change sont to : " + buttons.song) );
+	gui.add( buttons, 'Song', ['Flyday Chinatown', 'Soda City Funk'] ).name('Select Song' ).onChange( console.log("Change sont to : " + buttons.Song) );
 	gui.add( buttons, 'LaunchGame' ).name( 'Launch Matchmaking' ).onChange( function(value){ if (value == true) Launch_Game(buttons) });
-
 }
-
-
-
 
 var canResetCam = false;
 
@@ -404,6 +461,7 @@ function Launch_Game(buttons: any)
 	  mode: buttons.GameMode,
 	  login: buttons.Nickname,
 	  username: buttons.Nickname,
+	  nickname: buttons.Nickname,
 	  duel: DuelId,
 	  plx: -(config.arena_w / 2 - 5),
 	  prx: config.arena_w / 2 - 5,

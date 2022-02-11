@@ -12,6 +12,7 @@ import { Socket, Server } from "socket.io";
 
 var users_in_matchmaking_0 : Socket [];
 var users_in_matchmaking_1 : Socket [];
+var game_rooms: string [];
 
 const users_key_status = new Map();
 
@@ -23,11 +24,32 @@ const duels = new Map();
 const duels_mode = new Map();
 const duels_waiting_room = new Map();
 
-const room_match_info = new Map();
+const room_match_info = new Map();// room / match_infos =
+// {
+// 	player_0_nick: socket_nick.get(players[0].id),
+// 	player_1_nick: socket_nick.get(players[1].id),
+// 	player_0_score: 0,
+// 	player_1_score: 0,
+// 	player_0_socket: players[0],
+// 	player_1_socket: players[1],
+// 	GameStatus: launch_game,
+// 	player_0_paddle_size: 0,
+// 	player_1_paddle_size: 0,
+// 	game_done: 0
+// }
 
-const user_in_game = new Map();
+const user_in_game = new Map(); //Player Status -> socket.id / status (-1 can play, 0 || 1 is playing)
+const socket_nick = new Map(); // socket.id / nickname
+const nick_socket = new Map(); // nickname / socket.id
+
+const socket_infos = new Map(); //Socket.id -> infos = {UserStatus, Nickname, room}
+
+
+// room_match_info.get(socket_infos.get(nick_socket.get(config.spec)).room)
+// var nicknames : string [];
 users_in_matchmaking_0 = [];
 users_in_matchmaking_1 = [];
+game_rooms = [];
 
 var PI_s = 
 {
@@ -62,7 +84,7 @@ export class PongGateway
 		console.log (client.id + " has join the server");
 		users_key_status.set(client.id, 0);
 		users_id.set(client.id, -1);
-		user_in_game.set(client, -1);
+		user_in_game.set(client.id, -1);
 		return;
 	};
 
@@ -70,6 +92,7 @@ export class PongGateway
 	{
 		let index_of_client_0: number;
 		let index_of_client_1: number;
+		let index_of_game_room: number;
 
 		console.log (client.id + " has left the server");
 		// client.leave(client.id);
@@ -80,54 +103,56 @@ export class PongGateway
 		{
 			users_in_matchmaking_0.splice(index_of_client_0, 1);
 			console.log("users in classic matchmaking : " + users_in_matchmaking_0.length);
-			// await this.userService.changeStatus(users_id.get(client.id), Status.Online);
 		}
 		else if (index_of_client_1 != -1)
 		{
 			users_in_matchmaking_1.splice(index_of_client_1, 1);
 			console.log("users in bonus matchmaking : " + users_in_matchmaking_1.length);
-			// await this.userService.changeStatus(users_id.get(client.id), Status.Online);
 		}
-		else if (room_match_info.get(socket_id.get(users_id.get(client.id))))
+		else if (socket_infos.get(client.id))
+		// else if (room_match_info.get(socket_infos.get(client.id).room))//Le joueur était en game
 		{
-			console.log("OUI ON PASSE PAR LA  " + room_match_info.get(socket_id.get(users_id.get(client.id))));
-			if (room_match_info.get(socket_id.get(users_id.get(client.id)))[9] != 1) //Le joeur était en game
+			let player_room = socket_infos.get(client.id).room;
+			if (room_match_info.get(player_room) != null)
 			{
-				var game_room: string;
+				if (room_match_info.get(player_room).game_done != 1) //Le joeur était en game et elle était en cours
+				{
 
-				room_match_info.get(socket_id.get(users_id.get(client.id)))[9] = 1;
-				game_room = socket_id.get(users_id.get(client.id));
-				console.log("Game socket = " + game_room);
-				room_match_info.get(socket_id.get(users_id.get(client.id)));
-				this.server.to(socket_id.get(users_id.get(client.id))).emit("User_disconected", users_name.get(client.id));
+					room_match_info.get(player_room).game_done  = 1;//On met fin à la game
+					console.log("Game socket = " + player_room);
+					room_match_info.get(socket_id.get(users_id.get(client.id)));
+					this.server.to(player_room).emit("User_disconected", socket_nick.get(client.id));
 
-				console.log("A user LEFT A RUNNING MATCH");
+					console.log("A user LEFT A RUNNING MATCH");
 
 
-				console.log(room_match_info.get(socket_id.get(users_id.get(client.id)))[4]);
+					// console.log(room_match_info.get(socket_id.get(users_id.get(client.id)))[4]);
 
-				let data_picker = socket_id.get(users_id.get(client.id));
-				//Remettre le deux user Online
-				// await this.userService.changeStatus(room_match_info.get(data_picker)[6], Status.Online);
-				// await this.userService.changeStatus(room_match_info.get(data_picker)[7], Status.Online);
+					// let data_picker = socket_id.get(users_id.get(client.id));
+					//Remettre le deux user Online
+					// await this.userService.changeStatus(room_match_info.get(data_picker)[6], Status.Online);
+					// await this.userService.changeStatus(room_match_info.get(data_picker)[7], Status.Online);
 
-				let win_0 = false;
-				let win_1 = false;
 
-				if (room_match_info.get(data_picker)[4].id == client.id)
-					win_1 = true;
-				else
-					win_0 = true;
+					//Determine le gagnant (pas forcement utile car pas de stockage de données)
+					// let win_0 = false;
+					// let win_1 = false;
 
-				room_match_info.get(data_picker).push(1);
+					// if (room_match_info.get(data_picker)[4].id == client.id)
+					// 	win_1 = true;
+					// else
+					// 	win_0 = true;
 
-				// let return_tab: UpdateMatchDTO = {winner_0: win_0, points_0: room_match_info.get(data_picker)[2], userId_0: room_match_info.get(data_picker)[6],
-				// 	winner_1 : win_1, points_1: room_match_info.get(data_picker)[3], userId_1: room_match_info.get(data_picker)[7], game_mode: room_match_info.get(data_picker)[8]};
-				// this.MatchService.createMatch(return_tab);
-			}
-			else
-			{
-				room_match_info.delete(socket_id.get(users_id.get(client.id)));
+					// room_match_info.get(data_picker).push(1);
+					////////////////////////////////////////////////////////////////////////////
+
+					// let return_tab: UpdateMatchDTO = {winner_0: win_0, points_0: room_match_info.get(data_picker)[2], userId_0: room_match_info.get(data_picker)[6],
+					// 	winner_1 : win_1, points_1: room_match_info.get(data_picker)[3], userId_1: room_match_info.get(data_picker)[7], game_mode: room_match_info.get(data_picker)[8]};
+					// this.MatchService.createMatch(return_tab);
+				}
+				index_of_game_room = game_rooms.indexOf(player_room);
+				game_rooms.splice(index_of_game_room, 1);
+				room_match_info.delete(player_room);
 			}
 		}
 
@@ -138,9 +163,26 @@ export class PongGateway
 		users_id.delete(client.id);
 		users_key_status.delete(client.id);
 		users_name.delete(client.id);
-		user_in_game.set(client, -1);
+		user_in_game.set(client.id, -1);
 		return;
 	};
+
+	@SubscribeMessage('get_player_list')
+	async get_player_list(client: Socket)
+	{
+		let i: number = 0;
+		var users: string [];
+
+		users = [];
+
+		while (game_rooms[i])
+		{
+			users.push(room_match_info.get(game_rooms[i]).player_0_nick);
+			users.push(room_match_info.get(game_rooms[i]).player_1_nick);
+			i++;
+		}
+		client.emit("send_user_list", users);
+	}
 
 	@SubscribeMessage('send_username')
 	async get_username(client: Socket, user_id)
@@ -169,30 +211,45 @@ export class PongGateway
 	@SubscribeMessage('launch_game')
 	async launch_game(client: Socket, config)
 	{
+		//But : supprimer occurences username / login et les remplacer par nickname
 		console.log(client.id + " aka " + config.login + " trys to launch game, gamemode : " + config.mode + " vs " + config.duel);
 		users_id.set(client.id, config.login);
 		users_name.set(client.id, config.username);
 		socket_id.set(config.login, client.id);
 
+		socket_nick.set(client.id, config.nickname);
+		nick_socket.set(config.nickname, client.id);
+
 		let launch_game = -1;
 
 		//Won't be used here I think (maybe send a list to client with all games idk then show it in the ui)
+		//Will be used config.spec == nickname to spectate
 		console.log(config.spec);
 		if (config.spec != null)
 		{
-			console.log(client.id + " is willing to watch a game " + socket_id.get(config.spec));
-			client.join(socket_id.get(config.spec));
+			console.log(client.id + " is willing to watch a game ");
+			let spec_sock_id = nick_socket.get(config.spec).id;
+
+			// client.join(socket_id.get(config.spec));
+			client.join(socket_infos.get(spec_sock_id).room);
+
 			// console.log(users_name.get(room_match_info.get(socket_id.get(config.spec))[0].id));
-			client.emit("update_usernames", {right_user: room_match_info.get(socket_id.get(config.spec))[1], left_user:  room_match_info.get(socket_id.get(config.spec))[0]});
-			client.emit("update_score", {ls: room_match_info.get(socket_id.get(config.spec))[2], rs: room_match_info.get(socket_id.get(config.spec))[3] });
-			client.emit("update_paddles_size", {lp: room_match_info.get(socket_id.get(config.spec))[10], rp: room_match_info.get(socket_id.get(config.spec))[11] });
+
+			// room_match_info.get(socket_infos.get(nick_socket.get(config.spec)).room).infoRequise
+
+			client.emit("update_usernames", {right_user: room_match_info.get(socket_infos.get(spec_sock_id).room).player_0_nick, left_user:  room_match_info.get(socket_infos.get(spec_sock_id).room).player_1_nick});
+
+			client.emit("update_score", {ls: room_match_info.get(socket_infos.get(spec_sock_id).room).player_0_score, rs: room_match_info.get(socket_infos.get(spec_sock_id).room).player_1_score});
+
+			client.emit("update_paddles_size", {lp: room_match_info.get(socket_infos.get(spec_sock_id).room).player_0_paddle_size, rp: room_match_info.get(socket_infos.get(spec_sock_id).room).player_1_paddle_size});
+
 			return ;
 		}
 		
 		duels.set(config.login, config.duel);
 		duels_mode.set(config.login, config.mode);
 		duels_waiting_room.set(config.login, client);
-		//Duels, won't be used		
+		//Duels, won't be used
 		if (config.duel != null)
 		{
 			var duel_game_mode = 0;
@@ -234,6 +291,7 @@ export class PongGateway
 			}
 		}
 
+		//Matchmaking
 		else
 		{
 			if (config.mode == 'Normal Game')
@@ -241,12 +299,12 @@ export class PongGateway
 				console.log("User joined normal Matchmaking")
 				users_in_matchmaking_0.push(client);
 			}
-				else
+			else
 				users_in_matchmaking_1.push(client);
 
 			if (users_in_matchmaking_0.length >= 2) // Classic game
 			{
-				if (users_in_matchmaking_0[0].id == users_in_matchmaking_0[1].id || user_in_game.get(client) != -1)
+				if (users_in_matchmaking_0[0].id == users_in_matchmaking_0[1].id || user_in_game.get(client.id) != -1)
 				{
 					console.log("User allready registered !");
 					users_in_matchmaking_0.pop();
@@ -263,17 +321,17 @@ export class PongGateway
 
 				console.log(users_in_matchmaking_0.length);
 
-				console.log("2 Users or more are looking for a Classic game");
+				console.log("2 Users are looking for a Classic game");
 
 				players[0].join(players[0].id);
 				players[1].join(players[0].id);
 
-				socket_id.set(config.login, players[0].id);
+				// socket_id.set(config.login, players[0].id);
 			}
 
 			else if (users_in_matchmaking_1.length >= 2) // Bonus game
 			{
-				if (users_in_matchmaking_1[0].id == users_in_matchmaking_1[1].id || user_in_game.get(client) != -1)
+				if (users_in_matchmaking_1[0].id == users_in_matchmaking_1[1].id || user_in_game.get(client.id) != -1)
 				{
 					console.log("User allready registered !");
 					users_in_matchmaking_1.pop();
@@ -290,39 +348,70 @@ export class PongGateway
 
 				console.log(users_in_matchmaking_1.length);
 
-				console.log("2 Users or more are looking for a Bonus game");
+				console.log("2 Users are looking for a Bonus game");
 
 				players[0].join(players[0].id);
 				players[1].join(players[0].id);
 
-				socket_id.set(config.login, players[0].id);
+				// socket_id.set(config.login, players[0].id);
 			}
 		}
 
 		if (launch_game != -1) //if launch_game == 0 -> Classic game else if == 1 -> Bonus game
 		{
-			// await this.userService.changeStatus(users_id.get(players[0].id), Status.Ongame);
-			// await this.userService.changeStatus(users_id.get(players[1].id), Status.Ongame);
-
-			// console.log(await this.userService.findById(users_id.get(players[0].id)));
-
 			if (config.mode == 'Normal Game')
 			{
-				user_in_game.set(players[0], 0);
-				user_in_game.set(players[1], 0);
+				user_in_game.set(players[0].id, 0);
+				user_in_game.set(players[1].id, 0);
 			}
 			else
 			{
-				user_in_game.set(players[0], 1);
-				user_in_game.set(players[1], 1);				
+				user_in_game.set(players[0].id, 1);
+				user_in_game.set(players[1].id, 1);				
 			}
-			var	match_info: any []; //user_name_0, user_name_1, score_0, score_1, socket_0, socket_1, id_0, id_1, game_mode, is_game_ended, paddle_l_size, paddle_r_size -> 0 = normal -1 = small 1 = huge
-			match_info = [];
 
 			this.server.to(players[0].id).emit("update_usernames", {right_user: users_name.get(players[1].id), left_user: users_name.get(players[0].id) });
-			match_info.push(users_name.get(players[0].id), users_name.get(players[1].id), 0, 0, players[0], players[1],
-			users_id.get(players[0].id), users_id.get(players[1].id), launch_game, 0, 0, 0);
-			room_match_info.set(players[0].id, match_info);
+
+			var match_infos =
+			{
+				player_0_nick: socket_nick.get(players[0].id),
+				player_1_nick: socket_nick.get(players[1].id),
+				player_0_score: 0,
+				player_1_score: 0,
+				player_0_socket: players[0],
+				player_1_socket: players[1],
+				GameStatus: launch_game,
+				player_0_paddle_size: 0,
+				player_1_paddle_size: 0,
+				game_done: 0
+			}
+
+			room_match_info.set(players[0].id, match_infos);
+
+			// {UserStatus, Nickname, room}
+			var player_0_infos =
+			{
+				UserStatus: launch_game,
+				Nickname: match_infos.player_0_nick,
+				room: players[0].id
+			}
+
+			var player_1_infos =
+			{
+				UserStatus: launch_game,
+				Nickname: match_infos.player_1_nick,
+				room: players[0].id
+			}
+
+			socket_infos.set(players[0].id, player_0_infos);
+			socket_infos.set(players[1].id, player_1_infos);
+
+			game_rooms.push(players[0].id);
+
+			// match_info.push(users_name.get(players[0].id), users_name.get(players[1].id), 0, 0, players[0], players[1],
+			// users_id.get(players[0].id), users_id.get(players[1].id), launch_game, 0, 0, 0);
+			// room_match_info.set(players[0].id, match_infos);
+
 			var positions = 
 			{
 				paddle_l_pos_z : 0,
@@ -376,7 +465,8 @@ export class PongGateway
 			let win = -1;
 			let score_limit = 7;
 
-			while (win == -1 && match_info[9] != 1)// != 1 pour terminer le match
+			// while (win == -1 && match_infos.game_done != 1)// != 1 pour terminer le match
+			while(1)
 			{
 				await sleep(10);
 				positions.bonus_counter--;
@@ -498,12 +588,12 @@ export class PongGateway
 						if (positions.bonus_type < 5)//Le joueur prend un malus
 						{
 							positions.paddle_l_h_2 = config.ph_2 / 2;
-							match_info[10] = -1;
+							match_infos.player_0_paddle_size = -1;
 						}
 						else
 						{
 							positions.paddle_l_h_2 = config.ph_2 + config.ph_2 / 2;
-							match_info[10] = 1;
+							match_infos.player_0_paddle_size = 1;
 						}
 					}
 					else
@@ -511,12 +601,12 @@ export class PongGateway
 						if (positions.bonus_type < 5)
 						{
 							positions.paddle_r_h_2 = config.ph_2 / 2;
-							match_info[11] = -1;
+							match_infos.player_1_paddle_size = -1;
 						}
 						else
 						{
 							positions.paddle_r_h_2 = config.ph_2 + config.ph_2 / 2;
-							match_info[11] = 1;
+							match_infos.player_1_paddle_size = 1;
 						}
 					}
 					this.server.to(players[0].id).emit("bonus_taken", {taker: positions.bonus_owner, bx: positions.bonus_pos_x, bz: positions.bonus_pos_z});
@@ -538,9 +628,9 @@ export class PongGateway
 					if (positions.RightScore == score_limit)
 						win = 1;
 					this.server.to(players[0].id).emit("update_score", {ls: positions.LeftScore, rs: positions.RightScore});
-					match_info[2] = positions.LeftScore;
-					match_info[3] = positions.RightScore;
-					resetParams(0, positions, config, match_info);
+					match_infos.player_0_paddle_size = positions.LeftScore;
+					match_infos.player_1_paddle_size = positions.RightScore;
+					resetParams(0, positions, config, match_infos);
 				}
 		
 				else if (positions.ball_pos_x >= positions.arena_right_pos)
@@ -549,29 +639,35 @@ export class PongGateway
 					if (positions.LeftScore == score_limit)
 						win = 0;
 					this.server.to(players[0].id).emit("update_score", {ls: positions.LeftScore, rs: positions.RightScore});
-					match_info[2] = positions.LeftScore;
-					match_info[3] = positions.RightScore;
-					resetParams(1, positions, config, match_info);
+					match_infos.player_0_paddle_size = positions.LeftScore;
+					match_infos.player_1_paddle_size = positions.RightScore;
+					resetParams(1, positions, config, match_infos);
 				}
 			}
 
-			if (match_info[9] != 1)//Quelqu'un a GAGNÉ LE MATCH
+			if (match_infos.game_done != 1)//Quelqu'un a GAGNÉ LE MATCH
 			{
-				match_info[9] = 1;
+				match_infos.game_done  = 1;
 				let win_0 = false;
 				let win_1 = false;
 				if (win == 0)
 				{
 					win_0 = true;
-					this.server.to(players[0].id).emit("End_of_match", {name :users_name.get(players[0].id), pos: "left"});
+					this.server.to(players[0].id).emit("End_of_match", {name: socket_nick.get(players[0].id), pos: "left"});
 				}
 				else
 				{
 					win_1 = true;
-					this.server.to(players[0].id).emit("End_of_match", {name: users_name.get(players[1].id), pos : "right"});
+					this.server.to(players[0].id).emit("End_of_match", {name: socket_nick.get(players[1].id), pos : "right"});
 				}
-				user_in_game.set(players[0], -1);
-				user_in_game.set(players[1], -1);
+
+				let index_of_game_room: number;
+				index_of_game_room = game_rooms.indexOf(players[0].id);
+				game_rooms.splice(index_of_game_room, 1);
+
+				room_match_info.delete(players[0].id);
+				user_in_game.set(players[0].id, -1);
+				user_in_game.set(players[1].id, -1);
 				// let return_tab: UpdateMatchDTO = {winner_0: win_0, points_0: positions.LeftScore, userId_0: users_id.get(players[0].id),
 				// winner_1 : win_1, points_1: positions.RightScore, userId_1: users_id.get(players[1].id), game_mode: config.mode};
 
@@ -587,7 +683,7 @@ function sleep(ms)
 	return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function resetParams(x : number, positions: any, config: any, match_info: any)
+function resetParams(x : number, positions: any, config: any, match_infos: any)
 {
 	positions.ball_pos_x = 0;
 	positions.ball_pos_z = 0;
@@ -597,8 +693,8 @@ function resetParams(x : number, positions: any, config: any, match_info: any)
 
 	positions.paddle_l_h_2 = config.ph_2;
 	positions.paddle_r_h_2 = config.ph_2;
-	match_info[10] = 0;
-	match_info[11] = 1;
+	match_infos.player_1_paddle_size = 0;
+	match_infos.player_0_paddle_size = 0;
 
 	if (x == 0)
 		positions.ball_angle = Math.PI;
