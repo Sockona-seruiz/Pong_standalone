@@ -129,13 +129,17 @@ let buttons = {
 //   html_buttons[i].addEventListener('click', onButtonClick, false);
 // };
 
-
-var refresh_spec_buttons = document.getElementById("refresh_spec");
 var join_spec_buttons = document.getElementById("launch_spec");
 
-refresh_spec_buttons.addEventListener('click', get_in_game_user_list, false);
+var join_normal_match = document.getElementById("Normal_Match");
+var join_bonus_match = document.getElementById("Bonus_Match");
+var leave_match = document.getElementById("Leave_Matchmaking");
+
 join_spec_buttons.addEventListener('click', launch_spectate, false);
 
+join_normal_match.addEventListener('click', launch_normal_matchmaking, false);
+join_bonus_match.addEventListener('click', launch_bonus_matchmaking, false);
+leave_match.addEventListener('click', leave_matchmaking, false);
 
 function launch_spectate()
 {
@@ -159,6 +163,27 @@ function add_to_select(selectobject: any, value: string, id: string)
 	selectobject.appendChild(option);
 };
 
+function check_nickname()
+{
+	const nickname = (document.getElementById('nickname')as any).value;
+	console.log(nickname);
+	
+	let i: number = 0;
+
+	while (users_in_game[i])
+	{
+		if (nickname == users_in_game[i])
+		{
+			console.log("Nickname Allready Taken...");
+			return ("");
+		}
+		i++;
+	}
+	//Verifier si "nickname" est déjà en jeu et SI OUI, ne pas join le matchmaking
+
+	return (nickname);
+}
+
 function clear_select(selectobject: any)
 {
 	selectobject.selectedIndex = 0;
@@ -166,6 +191,37 @@ function clear_select(selectobject: any)
 	for(j = L; j >= 0; j--) {
 		selectobject.remove(j);
 	}
+}
+
+function launch_normal_matchmaking()
+{
+	const nickname = check_nickname();
+	if (nickname == "")
+	{
+		console.log("Game won't launch");
+		return ;
+	}
+	buttons.GameMode = "Normal Game";
+	buttons.Nickname = nickname;
+	Launch_Game(buttons);
+}
+
+function launch_bonus_matchmaking()
+{
+	const nickname = check_nickname();
+	if (nickname == "")
+	{
+		console.log("Game won't launch");
+		return ;
+	}
+	buttons.GameMode = "Bonus Game";
+	buttons.Nickname = nickname;
+	Launch_Game(buttons);
+}
+
+function leave_matchmaking()
+{
+	socket.emit('QuitMactchmaking');
 }
 
 get_in_game_user_list ();
@@ -177,8 +233,6 @@ function setupGui() {
 
 	gui.add( buttons, "Nickname").onFinishChange(function (value) {buttons.Nickname = value;});
 	gui.add( buttons, 'GameMode', [ 'Normal Game', 'Bonus Game' ] ).name( 'Game Mode' ).onChange( console.log("Gamemode") );
-	gui.add( buttons, 'SongToogle' ).name( 'Toogle song' ).onChange( console.log("Song " + buttons.SongToogle) );
-	gui.add( buttons, 'Song', ['Flyday Chinatown', 'Soda City Funk'] ).name('Select Song' ).onChange( console.log("Change sont to : " + buttons.Song) );
 	gui.add( buttons, 'LaunchGame' ).name( 'Launch Matchmaking' ).onChange(
 		function(value){
 			if (value == true)
@@ -190,6 +244,8 @@ function setupGui() {
 				socket.emit('QuitMactchmaking');
 			} 
 		});
+	gui.add( buttons, 'SongToogle' ).name( 'Toogle song' ).onChange( console.log("Song " + buttons.SongToogle) );
+	gui.add( buttons, 'Song', ['Flyday Chinatown', 'Soda City Funk'] ).name('Select Song' ).onChange( console.log("Change sont to : " + buttons.Song) );
 }
 
 var canResetCam = false;

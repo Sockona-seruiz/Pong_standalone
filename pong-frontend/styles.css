@@ -9,10 +9,9 @@ body {
   
   button{
 	background-color: white;
-	/* background-color: transparent; */
 	color: black;
 	border: 2px solid #008CBA;
-	padding: 10px 22px;
+	padding: 10px 15px;
 	text-align: center;
 	text-decoration: none;
 	display: inline-block;
@@ -25,7 +24,7 @@ body {
   
 
   button:hover {
-	background-color: #008CBA;; /* Green */
+	background-color: #008CBA;
 	color: white;
   }
 
@@ -37,6 +36,33 @@ body {
 	top:10%;
 	left:30%;
   }
+
+
+	.matchmaking_btns {
+		margin-top: 25px;
+		display: flex;
+		justify-content: center;
+	}
+	
+	.divider{
+		margin-right: 20px;
+	}
+
+	.leave_btn {
+		margin-top: 25px;
+		text-align: center;
+		display: flex;
+		justify-content: center;
+	}
+	
+	.leave_machmaking {
+		border: 2px solid #ba004d;
+	}
+
+	.leave_machmaking:hover {
+		background-color: #ba004d;
+		color: white;
+	}
 
   .spec_select select{
 	float: left;
@@ -54,3 +80,41 @@ body {
 	font-size: 14px;
 	border-radius: 6px;
   }
+
+
+  input {
+	object-position: 50% 50%;
+	background-color: white;
+	/* background-color: transparent; */
+	color: black;
+	border: 2px solid #008CBA;
+	padding: 10px 15px;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	font-size: 42px;
+	border-radius: 6px;
+
+	transition-duration: 0.4s;
+  }
+
+  .centre {
+	text-align:center;
+	padding-top: 5%;
+	}
+
+	.spec{
+		height: 40px;
+	}
+  /* div.Nick_Matchmaking
+  {
+    display: block;
+    text-align: center;
+}
+Nick_Matchmaking
+{
+    display: inline-block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: left;
+  } */

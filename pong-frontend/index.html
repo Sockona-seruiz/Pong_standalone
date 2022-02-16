@@ -6,7 +6,7 @@
 <!-- By: seruiz <seruiz@student.42lyon.fr>          +#+  +:+       +#+       -->
 <!--                                              +#+#+#+#+#+   +#+          -->
 <!-- Created: 2021/09/10 17:11:31 by seruiz            #+#    #+#            -->
-<!-- Updated: 2022/02/11 13:14:49 by seruiz           ###   ########lyon.fr  -->
+<!-- Updated: 2022/02/16 16:26:07 by seruiz           ###   ########lyon.fr  -->
 <!--                                                                         -->
 <!-- *********************************************************************** -->
 
@@ -28,14 +28,31 @@
 
 		<div style="width:100%;height:50px;text-align: center; color:white;" class="ui">
 
-		<button class="refresh_spec" id="refresh_spec" class="ui">Refresh List</button>
-		<element class="spec_select">
-		<select name="spectate" id="spectate-select"></select>
-		</element>
-		<button class="launch_spec" id="launch_spec" class="ui">Spectate</button>
+			<div class="spec">
+				<element class="spec_select">
+				<select name="spectate" id="spectate-select"></select>
+				</element>
+				<button class="launch_spec" id="launch_spec" class="ui">Spectate</button>
+			</div>
 
-		<!-- <button id="refresh_User" class="ui">Refresh List</button>
-		<select name="duel" id="duel-select"></select> -->
+			<div class="centre">
+				<input type="text" id="nickname" name="Nickname" value="" placeholder="Your nickname">
+			</div> 
+
+			<div class="matchmaking_btns">
+				<div class="divider">
+				<button class="normal_match" id="Normal_Match" class="ui">Join normal Matchmaking</button>
+				</div>
+				<button class="bonus_match" id="Bonus_Match" class="ui">Join bonus Matchmaking</button>
+			</div>
+
+			<div class="leave_btn">
+				<button class="leave_machmaking" id="Leave_Matchmaking" class="ui">Leave Matchmaking</button>
+			</div>
+
+
+			<!-- <button id="refresh_User" class="ui">Refresh List</button>
+			<select name="duel" id="duel-select"></select> -->
 
 		</div>
 

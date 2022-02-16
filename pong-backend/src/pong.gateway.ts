@@ -10,6 +10,9 @@ import { Socket, Server } from "socket.io";
 // import { UserService } from "src/user/user.service";
 // import { MatchService } from './match.service';
 
+
+//Creer une room DE TOUT LES USERS LOG IN pour pouvoir emit la nouvelle liste de gens à spec
+
 var users_in_matchmaking_0 : Socket [];
 var users_in_matchmaking_1 : Socket [];
 var game_rooms: string [];
@@ -81,6 +84,8 @@ export class PongGateway
 
 	handleConnection(client: Socket)
 	{
+		this.server.emit("send_user_list");
+
 		console.log (client.id + " has join the server");
 		users_key_status.set(client.id, 0);
 		users_id.set(client.id, -1);
@@ -204,7 +209,9 @@ export class PongGateway
 			users.push(room_match_info.get(game_rooms[i]).player_1_nick);
 			i++;
 		}
-		client.emit("send_user_list", users);
+
+		this.server.emit("send_user_list", users);
+		// client.emit("send_user_list", users);
 	};
 
 	@SubscribeMessage('send_username')
@@ -255,16 +262,19 @@ export class PongGateway
 			console.log("spec_sock_id = " + spec_sock_id);
 
 			// client.join(socket_id.get(config.spec));
+			
+			//Check if the user we are willing to spec is still in game
 			client.join(socket_infos.get(spec_sock_id).room);
 
 			// console.log(users_name.get(room_match_info.get(socket_id.get(config.spec))[0].id));
 
 			// room_match_info.get(socket_infos.get(nick_socket.get(config.spec)).room).infoRequise
 
-			client.emit("update_usernames", {right_user: room_match_info.get(socket_infos.get(spec_sock_id).room).player_0_nick, left_user:  room_match_info.get(socket_infos.get(spec_sock_id).room).player_1_nick});
+			client.emit("update_usernames", {right_user: room_match_info.get(socket_infos.get(spec_sock_id).room).player_1_nick, left_user:  room_match_info.get(socket_infos.get(spec_sock_id).room).player_0_nick});
 
 			client.emit("update_score", {ls: room_match_info.get(socket_infos.get(spec_sock_id).room).player_0_score, rs: room_match_info.get(socket_infos.get(spec_sock_id).room).player_1_score});
 
+			//Update bonus positions (they actualy don't apear to specs if they join and a bonus is allready spawned)
 			client.emit("update_paddles_size", {lp: room_match_info.get(socket_infos.get(spec_sock_id).room).player_0_paddle_size, rp: room_match_info.get(socket_infos.get(spec_sock_id).room).player_1_paddle_size});
 
 			return ;
@@ -432,6 +442,9 @@ export class PongGateway
 
 			game_rooms.push(players[0].id);
 
+			this.get_player_list(null);
+			// this.server.emit(upda);
+
 			// match_info.push(users_name.get(players[0].id), users_name.get(players[1].id), 0, 0, players[0], players[1],
 			// users_id.get(players[0].id), users_id.get(players[1].id), launch_game, 0, 0, 0);
 			// room_match_info.set(players[0].id, match_infos);
@@ -487,10 +500,10 @@ export class PongGateway
 			positions.bonus_counter = getRandomInt(500, 1000);
 
 			let win = -1;
-			let score_limit = 7;
+			//CHANGE SCORE LIMIT HERE
+			let score_limit = 99;
 
-			// while (win == -1 && match_infos.game_done != 1)// != 1 pour terminer le match
-			while(1)
+			while (win == -1 && match_infos.game_done != 1)// != 1 pour terminer le match
 			{
 				await sleep(10);
 				positions.bonus_counter--;
