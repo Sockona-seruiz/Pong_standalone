@@ -454,6 +454,7 @@ export class PongGateway
 			game_rooms.push(players[0].id);
 
 			this.get_player_list(null);
+			this.server.to(players[0].id).emit("update_score", {ls: 0, rs: 0});
 			// this.server.emit(upda);
 
 			// match_info.push(users_name.get(players[0].id), users_name.get(players[1].id), 0, 0, players[0], players[1],
