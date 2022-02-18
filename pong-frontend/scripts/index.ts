@@ -83,18 +83,24 @@ users_in_game = [];
 
 socket.on("send_user_list", (users: any) => {
 	let i: number = 0;
+	console.log("test");
 	if (users != null)
 	{
+			console.log("Users!=null");
 			clear_select(document.getElementById("spectate-select"));
 			add_to_select(document.getElementById("spectate-select"), "", "--Please choose someone to spectate--");
 			while (users[i])
 			{
 				console.log("users : " + users[i]);
 				add_to_select(document.getElementById("spectate-select"), users[i], users[i]);
-				users_in_game[i] = users[i];
+				users_in_game.push(users[i]);
 				i++;
 			}
+			if (i == 0)
+				users_in_game = [];
 	}
+	else
+		users_in_game = [];
 });
 
 function get_in_game_user_list ()
@@ -134,6 +140,9 @@ var join_spec_buttons = document.getElementById("launch_spec");
 var join_normal_match = document.getElementById("Normal_Match");
 var join_bonus_match = document.getElementById("Bonus_Match");
 var leave_match = document.getElementById("Leave_Matchmaking");
+
+var loader = document.getElementById("loader");
+
 
 join_spec_buttons.addEventListener('click', launch_spectate, false);
 
@@ -182,6 +191,16 @@ function check_nickname()
 	//Verifier si "nickname" est déjà en jeu et SI OUI, ne pas join le matchmaking
 
 	return (nickname);
+}
+
+function hide_ui()
+{
+	document.getElementById("Ui").style.display = 'none';
+}
+
+function show_ui()
+{
+	document.getElementById("Ui").style.display = 'inline-block';
 }
 
 function clear_select(selectobject: any)
@@ -660,6 +679,29 @@ let bonus_s =
 	bonus_type: 0
 };
 
+socket.on("hide_ui", (infos: any) =>
+{
+	document.getElementById("Ui").style.display = 'none';
+});
+
+socket.on("show_ui", (infos: any) =>
+{
+	document.getElementById("Ui").style.display = 'inline-block';
+});
+
+socket.on("hide_loader", (infos: any) =>
+{
+	console.log("hide loader");
+	document.getElementById("loader").style.display = 'none';
+});
+
+socket.on("show_loader", (infos: any) =>
+{
+	console.log("show loader");
+	document.getElementById("loader").style.display = 'inline-block';
+});
+
+
 socket.on("spawn_bonus", (infos: any) =>
 {
 	if (infos.isbonus < 5)
@@ -779,6 +821,7 @@ socket.on("User_disconected", (name: string) => {
   });
   deco_text.position.set(0, +10, 0);
   scene.add(deco_text);
+  show_ui();
 });
 
 socket.on("End_of_match", (winner: any) => {
@@ -790,7 +833,7 @@ socket.on("End_of_match", (winner: any) => {
   });
   winner_text.position.set(0, +10, 0);
   scene.add(winner_text);
-
+  show_ui();
   ft_ending_fireworks(winner.pos, winner.color);
 });
 
