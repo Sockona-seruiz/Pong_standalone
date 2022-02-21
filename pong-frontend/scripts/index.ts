@@ -15,19 +15,25 @@ import TextSprite from "@seregpie/three.text-sprite";
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min';
 
 import { init_score } from "./score_init";
-import { updateScore } from "./score";
+import { updateScore, update_scores } from "./score";
 import { init_paddles } from "./paddles_init";
 import { init_ball } from "./ball_init";
 import { init_arena } from "./arena_init";
 import { init_audio } from "./audio_init";
 import { updateCurrentSong } from './audio_init';
+import { move_ball } from './update_ball';
 import { init_plane } from "./plane_init";
 import { moveSun } from "./update_sun";
 import { updateAudioVisualizer } from "./update_audio";
 import { updateplane } from "./update_plane";
-import { launchFirework } from "./fireworks";
+import { ft_ending_fireworks, launchFirework } from "./fireworks";
 
 import * as io from "socket.io-client";
+import { change_names, init_vs_text } from './update_text';
+import { init_stars } from './stars_init';
+import { init_bonus, spawn_bonus } from './bonus';
+import { bonus_taken } from './bonus';
+import { update_paddles_size } from './bonus';
 
 console.log("Script is running");
 
@@ -404,6 +410,9 @@ updateScore(score_s);
 let paddles_s = init_paddles(scene, Leftcol, Rightcol, BLOOM_SCENE, config);
 let arena_s = init_arena(scene, BLOOM_SCENE, config);
 let ball_s = init_ball(scene, BLOOM_SCENE);
+init_vs_text(scene, PI_s);
+init_stars(scene, config);
+let bonus_s = init_bonus(scene, BLOOM_SCENE);
 
 //Keys =====
 let controls = {
@@ -475,203 +484,6 @@ const onKeyUp = function (event: any) {
 document.addEventListener("keydown", onKeyDown);
 document.addEventListener("keyup", onKeyUp);
 
-//Stars
-const vertices = [];
-
-for (let i = 0; i < 1000; i++) {
-  const x = THREE.MathUtils.randFloatSpread(500);
-  const y = THREE.MathUtils.randFloatSpread(500);
-  const z = THREE.MathUtils.randFloatSpread(500);
-
-  if (
-    x < config.arena_w_2 + 10 &&
-    x > -config.arena_w_2 - 10 &&
-    y > -10 &&
-    y < 60 &&
-    z < config.arena_h_2 + 10 &&
-    z > -config.arena_h_2 - 10
-  )
-    i--;
-  else vertices.push(x, y, z);
-}
-
-const geometry = new THREE.BufferGeometry();
-geometry.setAttribute(
-  "position",
-  new THREE.Float32BufferAttribute(vertices, 3)
-);
-
-const material = new THREE.PointsMaterial({ color: 0x888888 });
-
-const points = new THREE.Points(geometry, material);
-
-scene.add(points);
-
-// var Leftcol = 0x0ae0ff;
-// var Rightcol = 0xff13a5;
-
-//=========================User names
-//Vs text
-var vs_fontloader = new FontLoader();
-
-vs_fontloader.load("../fonts/Retro_Stereo_Wide_Regular.json",
-	// onLoad callback
-	function ( font ) {
-
-		const color = 0xffffff;
-
-		const matLite = new THREE.MeshBasicMaterial( {
-			color: color,
-			transparent: true,
-			opacity: 0.4,
-			side: THREE.DoubleSide
-		} );
-
-		var message = "VS";
-
-		const shapes = font.generateShapes( message, 5 );
-
-		const geometry = new THREE.ShapeGeometry( shapes );
-
-		geometry.computeBoundingBox();
-
-		const xMid = - 0.5 * ( geometry.boundingBox.max.x - geometry.boundingBox.min.x );
-
-		geometry.translate( xMid, 0, 0 );
-
-		// make shape ( N.B. edge view not visible )
-
-		const vstext = new THREE.Mesh( geometry, matLite );
-		vstext.position.set(0, 0, 35);
-		vstext.rotation.x = -PI_s.M_PI_2;
-		scene.add( vstext );
-	} ); //end load function
-
-var left_font = new FontLoader();
-var right_font = new FontLoader();
-
-var left_nick: THREE.Mesh;
-var right_nick: THREE.Mesh;
-// vstext.name = "vstext";
-
-function change_names(left_name, right_name)
-{
-	left_font.load("../fonts/Retro_Stereo_Wide_Regular.json",
-	// onLoad callback
-	function ( font ) {
-
-		const selectedObject = scene.getObjectByName("left_nick");
-
-		if (selectedObject)
-		{
-		// console.log("out load fct :" + selectedObject.name);
-		(selectedObject as any).geometry.dispose();
-		(selectedObject as any).material.dispose();
-		scene.remove(selectedObject);
-		}
-
-		const color = 0x61e8fa;
-		const matLite = new THREE.MeshBasicMaterial( {
-			color: color,
-			transparent: true,
-			opacity: 0.4,
-			side: THREE.DoubleSide
-		} );
-
-		var message = left_name;
-
-		const shapes = font.generateShapes( message, 5 );
-
-		const geometry = new THREE.ShapeGeometry( shapes );
-
-		geometry.computeBoundingBox();
-
-		const xMid = - 0.5 * ( geometry.boundingBox.max.x - geometry.boundingBox.min.x );
-
-		geometry.translate( xMid, 0, 0 );
-
-		// make shape ( N.B. edge view not visible )
-
-		left_nick = new THREE.Mesh( geometry, matLite );
-		left_nick.position.z = - 150;
-		left_nick.name = "left_nick";
-		left_nick.position.set(-40, 0, 35);
-		left_nick.rotation.x = -PI_s.M_PI_2;
-		scene.add( left_nick );
-		// console.log("In load fct :" + left_nick.name);
-	} );
-
-	right_font.load("../fonts/Retro_Stereo_Wide_Regular.json",
-	// onLoad callback
-	function ( font ) {
-
-		const selectedObject = scene.getObjectByName("right_nick");
-
-		if (selectedObject)
-		{
-		// console.log("out load fct :" + selectedObject.name);
-		(selectedObject as any).geometry.dispose();
-		(selectedObject as any).material.dispose();
-		scene.remove(selectedObject);
-		}
-
-		const color = 0xfc53bc;
-		const matLite = new THREE.MeshBasicMaterial( {
-			color: color,
-			transparent: true,
-			opacity: 0.4,
-			side: THREE.DoubleSide
-		} );
-
-		var message = right_name;
-
-		const shapes = font.generateShapes( message, 5 );
-
-		const geometry = new THREE.ShapeGeometry( shapes );
-
-		geometry.computeBoundingBox();
-
-		const xMid = - 0.5 * ( geometry.boundingBox.max.x - geometry.boundingBox.min.x );
-
-		geometry.translate( xMid, 0, 0 );
-
-		// make shape ( N.B. edge view not visible )
-
-		right_nick = new THREE.Mesh( geometry, matLite );
-		right_nick.position.z = - 150;
-		right_nick.name = "right_nick";
-		right_nick.position.set(40, 0, 35);
-		right_nick.rotation.x = -PI_s.M_PI_2;
-		scene.add( right_nick );
-		// console.log("In load fct :" + right_nick.name);
-	} );
-}
-
-// change_names(left_name, right_name);
-
-// left_name = "";
-// change_names(left_name, right_name);
-
-
-// left_name = "wesfghjgftdgbvfd";
-// change_names(left_name, right_name);
-/*
-const selectedObject = scene.getObjectByName("vstext");
-console.log("out load fct :" + selectedObject.name);
-
-scene.remove(selectedObject);
-*/
-// change_names(left_name, right_name);
-
-// var vs_text = new TextSprite({
-//   text: "VS",
-//   fontFamily: "Arial, Helvetica, sans-serif",
-//   fontSize: 5,
-//   color: "#ffffff",
-// });
-// vs_text.position.set(0, -5, 29);
-// scene.add(vs_text);
-
 function Launch_Game(buttons: any)
 {
 	socket.emit("launch_game", {
@@ -691,10 +503,8 @@ function Launch_Game(buttons: any)
 	});
 };
 
-// Right_user.text = "";
-
 socket.on("update_usernames", (names: any) => {
-	change_names(names.left_user, names.right_user);
+	change_names(scene, names.left_user, names.right_user, PI_s);
 });
 
 socket.on("change_ball_color", (i: number) => {
@@ -715,90 +525,8 @@ socket.on("change_ball_color", (i: number) => {
 });
 
 socket.on("update_positions", (positions: any) => {
-  //Ball
-  // console.log(positions.bpz + " test");
-  ball_s.ball.position.x = positions.bpx;
-  ball_s.ball.position.z = positions.bpz;
-  ball_s.ball_outline.position.x = ball_s.ball.position.x;
-  ball_s.ball_outline.position.z = ball_s.ball.position.z;
-  ball_s.light.position.x = ball_s.ball.position.x;
-  ball_s.light.position.z = ball_s.ball.position.z;
-
-  //Paddles
-  paddles_s.bar_right.position.z = positions.rpz;
-  paddles_s.bar_right_out.position.z = paddles_s.bar_right.position.z;
-  paddles_s.bar_left.position.z = positions.lpz;
-  paddles_s.bar_left_out.position.z = paddles_s.bar_left.position.z;
-
-  //Trainee
-  ball_s.pos_history_x.unshift(ball_s.ball.position.x);
-  ball_s.pos_history_z.unshift(ball_s.ball.position.z);
-  ball_s.pos_history_x.pop();
-  ball_s.pos_history_z.pop();
-
-  if (ball_s.trainee_msh[ball_s.history_depth] != null) {
-    scene.remove(ball_s.trainee_msh[ball_s.history_depth]);
-    ball_s.trainee_msh.pop();
-  }
-  (ball_s.trainee as any) = new THREE.Shape();
-
-  (ball_s.trainee as any).moveTo(
-    ball_s.pos_history_x[0],
-    ball_s.pos_history_z[0] - 0.5
-  );
-  (ball_s.trainee as any).lineTo(
-    ball_s.pos_history_x[1],
-    ball_s.pos_history_z[1] - 0.5
-  );
-  (ball_s.trainee as any).lineTo(
-    ball_s.pos_history_x[1],
-    ball_s.pos_history_z[1] + 0.5
-  );
-  (ball_s.trainee as any).lineTo(
-    ball_s.pos_history_x[0],
-    ball_s.pos_history_z[0] + 0.5
-  );
-
-  ball_s.old_trainee_pos_x = ball_s.pos_history_x[0 + 1];
-  ball_s.old_trainee_pos_z = ball_s.pos_history_z[0 + 1] + 0.25;
-  (ball_s.trainee_geo as any) = new THREE.ShapeGeometry(ball_s.trainee as any);
-
-  if (ball_s.after_reset == 1) {
-    ball_s.trainee_wmat.color.setHex(0xffffff);
-    (ball_s.trainee_msh as any).unshift(
-      new THREE.Mesh(ball_s.trainee_geo as any, ball_s.trainee_wmat)
-    );
-  } else
-    (ball_s.trainee_msh as any).unshift(
-      new THREE.Mesh(ball_s.trainee_geo as any, ball_s.trainee_cmat)
-    );
-
-  (ball_s.trainee_msh[0] as any).rotation.x += PI_s.M_PI_2;
-  (ball_s.trainee_msh[0] as any).layers.enable(BLOOM_SCENE);
-  scene.add(ball_s.trainee_msh[0]);
+  move_ball(scene, ball_s, positions, paddles_s, BLOOM_SCENE, PI_s);
 });
-
-const geometry_bonus = new THREE.BoxGeometry(1, 1, 1);
-const bonus_m = new THREE.MeshBasicMaterial( { color: 0xffffff, wireframe: false} );
-const bonus_mesh = new THREE.Mesh( geometry_bonus, bonus_m );
-bonus_mesh.position.y = -50;
-
-var BonusoutlineMaterial= new THREE.MeshBasicMaterial( { color: 0xffffff, side: THREE.BackSide } );
-const geometry_bonus_out = new THREE.BoxGeometry(2,2,2);
-var BonusoutlineMesh = new THREE.Mesh( geometry_bonus_out, BonusoutlineMaterial );
-BonusoutlineMesh.position.x = bonus_mesh.position.x;
-BonusoutlineMesh.position.y = bonus_mesh.position.y;
-BonusoutlineMesh.position.z = bonus_mesh.position.z;
-
-scene.add (bonus_mesh, BonusoutlineMesh);
-BonusoutlineMesh.layers.enable( BLOOM_SCENE );
-
-let bonus_s =
-{
-	bonus: bonus_mesh,
-	bonus_outline: BonusoutlineMesh,
-	bonus_type: 0
-};
 
 socket.on("hide_ui", (infos: any) =>
 {
@@ -822,115 +550,23 @@ socket.on("show_loader", (infos: any) =>
 	document.getElementById("loader").style.display = 'inline-block';
 });
 
-
 socket.on("spawn_bonus", (infos: any) =>
 {
-	if (infos.isbonus < 5)
-	{
-		bonus_s.bonus_outline.material.color.setHex(0xff0000);
-		bonus_s.bonus_type = 0;
-	}
-	else
-	{
-		bonus_s.bonus_outline.material.color.setHex(0x00ff00);
-		bonus_s.bonus_type = 1;
-	}
-	bonus_s.bonus.position.y = 0.2;
-	bonus_s.bonus.position.x = infos.bx;
-	bonus_s.bonus.position.z = infos.bz;
-	bonus_s.bonus_outline.position.y = 0.2;
-	bonus_s.bonus_outline.position.x = infos.bx;
-	bonus_s.bonus_outline.position.z = infos.bz;
+	spawn_bonus (infos, bonus_s);
 });
 
 socket.on("bonus_taken", (infos: any) =>
 {
-	console.log("BONUS TAKEN");
-	bonus_s.bonus.position.y = -50;
-	bonus_s.bonus_outline.position.y = -50;
-	bonus_s.bonus_outline.material.color.setHex(0xfffff);
-	if (infos.taker == 0)//Left took the bonus
-	{
-		if (bonus_s.bonus_type == 0)//Malus
-		{
-			paddles_s.bar_left.scale.set(1, 1, 0.5);
-			paddles_s.bar_left_out.scale.set(1, 1, 0.5);
-		}
-		else
-		{
-			paddles_s.bar_left.scale.set(1, 1, 1.5);
-			paddles_s.bar_left_out.scale.set(1, 1, 1.5);
-		}		
-		console.log("Left took the bonus");
-	}
-	else
-	{
-		if (bonus_s.bonus_type == 0)//Malus
-		{
-			paddles_s.bar_right.scale.set(1, 1, 0.5);
-			paddles_s.bar_right_out.scale.set(1, 1, 0.5);
-		}
-		else
-		{
-			paddles_s.bar_right.scale.set(1, 1, 1.5);
-			paddles_s.bar_right_out.scale.set(1, 1, 1.5);
-		}		
-		console.log("Right took the bonus");
-	}
-	bonus_s.bonus_outline.material.color.setHex(0x0000ff);
+	bonus_taken (infos, bonus_s, paddles_s);
 });
 
 socket.on("update_paddles_size", (infos: any) =>
 {
-	if (infos.lp == 1)
-	{
-		paddles_s.bar_left.scale.set(1, 1, 1.5);
-		paddles_s.bar_left_out.scale.set(1, 1, 1.5);
-	}
-	else if (infos.lp == -1)
-	{
-		paddles_s.bar_left.scale.set(1, 1, 0.5);
-		paddles_s.bar_left_out.scale.set(1, 1, 0.5);
-	}
-	if (infos.rp == 1)
-	{
-		paddles_s.bar_right.scale.set(1, 1, 1.5);
-		paddles_s.bar_right_out.scale.set(1, 1, 1.5);
-	}
-	else if (infos.rp == -1)
-	{
-		paddles_s.bar_right.scale.set(1, 1, 0.5);
-		paddles_s.bar_right_out.scale.set(1, 1, 0.5);
-	}
+	update_paddles_size(infos, paddles_s);
 });
 
 socket.on("update_score", (scores: any) => {
-  score_s.LeftScore = scores.ls;
-  score_s.RightScore = scores.rs;
-  updateScore(score_s);
-  launchFirework(
-    scene,
-    ball_s.ball.position.x + 1,
-    0,
-    ball_s.ball.position.z,
-    20,
-    25,
-    ball_s.ball_outline.material.color
-  );
-
-  ball_s.ball_outline.material.color.setHex(0xffffff);
-  ball_s.light.color.setHex(0xffffff);
-  ball_s.pos_history_x.unshift(0);
-  ball_s.pos_history_z.unshift(0);
-  ball_s.pos_history_x.pop();
-  ball_s.pos_history_z.pop();
-
-  paddles_s.bar_left.scale.set(1, 1, 1);
-  paddles_s.bar_left_out.scale.set(1, 1, 1);
-  paddles_s.bar_right.scale.set(1, 1, 1);
-  paddles_s.bar_right_out.scale.set(1, 1, 1);
-
-  ball_s.after_reset = 1;
+	update_scores(scores, score_s, scene, ball_s, paddles_s);
 });
 
 socket.on("User_disconected", (name: string) => {
@@ -955,29 +591,8 @@ socket.on("End_of_match", (winner: any) => {
   winner_text.position.set(0, +10, 0);
   scene.add(winner_text);
   show_ui();
-  ft_ending_fireworks(winner.pos, winner.color);
+  ft_ending_fireworks(winner.pos, winner.color, ball_s, paddles_s, scene);
 });
-
-async function ft_ending_fireworks(pos: any, color: any) {
-  while (ball_s.trainee_msh.length > 0) {
-    scene.remove(ball_s.trainee_msh[ball_s.trainee_msh.length - 1]);
-    ball_s.trainee_msh.pop();
-    await sleep(10);
-  }
-
-  if (pos == "left") color = paddles_s.left_col;
-  else color = paddles_s.right_col;
-
-  let rdX: number;
-  let rdZ: number;
-
-  while (1) {
-    rdX = getRandomInt(-60, 60);
-    rdZ = getRandomInt(-30, 40);
-    launchFirework(scene, rdX, 0, rdZ, 20, 25, color);
-    await sleep(getRandomInt(1500, 2000));
-  }
-}
 
 //The render loop ======
 const animate = function () {
@@ -1005,12 +620,6 @@ const animate = function () {
 };
 
 animate();
-
-function getRandomInt(min: any, max: any) {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min)) + min;
-}
 
 function sleep(ms: any) {
   return new Promise((resolve) => setTimeout(resolve, ms));

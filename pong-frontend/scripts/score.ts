@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { launchFirework } from './fireworks';
 
 var drawfct: any = [];
 
@@ -255,3 +256,36 @@ export function updateScore(score_s: {
 	drawfct[rscoredizaine](score_s.crystals[2], false, score_s);
 	drawfct[rscoreunite](score_s.crystals[3], false, score_s);
 }
+
+export function update_scores(scores: any, score_s: any, scene, ball_s: any, paddles_s: any)
+{
+score_s.LeftScore = scores.ls;
+score_s.RightScore = scores.rs;
+updateScore(score_s);
+if (scores.ls != 0 || scores.rs != 0)
+{
+	launchFirework(
+	  scene,
+	  ball_s.ball.position.x + 1,
+	  0,
+	  ball_s.ball.position.z,
+	  20,
+	  25,
+	  ball_s.ball_outline.material.color
+	);
+}
+
+ball_s.ball_outline.material.color.setHex(0xffffff);
+ball_s.light.color.setHex(0xffffff);
+ball_s.pos_history_x.unshift(0);
+ball_s.pos_history_z.unshift(0);
+ball_s.pos_history_x.pop();
+ball_s.pos_history_z.pop();
+
+paddles_s.bar_left.scale.set(1, 1, 1);
+paddles_s.bar_left_out.scale.set(1, 1, 1);
+paddles_s.bar_right.scale.set(1, 1, 1);
+paddles_s.bar_right_out.scale.set(1, 1, 1);
+
+ball_s.after_reset = 1;
+};

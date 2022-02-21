@@ -98,3 +98,31 @@ export function launchFirework(scene: THREE.Scene, x: number, y: number, z: numb
 	// while (fireworks[0].position.x < x + 20)
 	// 	fireworks[0].position.x += 0.05;
 }
+
+export async function ft_ending_fireworks(pos: any, color: any, ball_s: any, paddles_s: any, scene: any) {
+	while (ball_s.trainee_msh.length > 0) {
+	  scene.remove(ball_s.trainee_msh[ball_s.trainee_msh.length - 1]);
+	  ball_s.trainee_msh.pop();
+	  await sleep(10);
+	}
+  
+	if (pos == "left") color = paddles_s.left_col;
+	else color = paddles_s.right_col;
+  
+	let rdX: number;
+	let rdZ: number;
+  
+	while (1) {
+	  rdX = getRandomInt(-60, 60);
+	  rdZ = getRandomInt(-30, 40);
+	  launchFirework(scene, rdX, 0, rdZ, 20, 25, color);
+	  await sleep(getRandomInt(1500, 2000));
+	}
+  }
+
+  function getRandomInt(min: any, max: any) {
+	min = Math.ceil(min);
+	max = Math.floor(max);
+	return Math.floor(Math.random() * (max - min)) + min;
+  }
+  
