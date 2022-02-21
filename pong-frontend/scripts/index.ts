@@ -511,22 +511,14 @@ scene.add(points);
 // var Rightcol = 0xff13a5;
 
 //=========================User names
+//Vs text
+var vs_fontloader = new FontLoader();
 
-
-
-var fontloader = new FontLoader();
-
-fontloader.load("../fonts/Retro_Stereo_Wide_Regular.json",
-
+vs_fontloader.load("../fonts/Retro_Stereo_Wide_Regular.json",
 	// onLoad callback
 	function ( font ) {
 
-		const color = 0x006699;
-
-		const matDark = new THREE.LineBasicMaterial( {
-			color: color,
-			side: THREE.DoubleSide
-		} );
+		const color = 0xffffff;
 
 		const matLite = new THREE.MeshBasicMaterial( {
 			color: color,
@@ -537,7 +529,7 @@ fontloader.load("../fonts/Retro_Stereo_Wide_Regular.json",
 
 		var message = "VS";
 
-		const shapes = font.generateShapes( message, 100 );
+		const shapes = font.generateShapes( message, 5 );
 
 		const geometry = new THREE.ShapeGeometry( shapes );
 
@@ -549,69 +541,136 @@ fontloader.load("../fonts/Retro_Stereo_Wide_Regular.json",
 
 		// make shape ( N.B. edge view not visible )
 
-		const text = new THREE.Mesh( geometry, matLite );
-		text.position.z = - 150;
-		scene.add( text );
-
-		// make line shape ( N.B. edge view remains visible )
-
-		const holeShapes = [];
-
-		for ( let i = 0; i < shapes.length; i ++ ) {
-
-			const shape = shapes[ i ];
-
-			if ( shape.holes && shape.holes.length > 0 ) {
-
-				for ( let j = 0; j < shape.holes.length; j ++ ) {
-
-					const hole = shape.holes[ j ];
-					holeShapes.push( hole );
-
-				}
-
-			}
-
-		}
-
-		shapes.push.apply( shapes, holeShapes );
-
-		const lineText = new THREE.Object3D();
-
-		for ( let i = 0; i < shapes.length; i ++ ) {
-
-			const shape = shapes[ i ];
-
-			const points = shape.getPoints();
-			const geometry = new THREE.BufferGeometry().setFromPoints( points );
-
-			geometry.translate( xMid, 0, 0 );
-
-			const lineMesh = new THREE.Line( geometry, matDark );
-			lineText.add( lineMesh );
-
-		}
-
-		scene.add( lineText );
-
+		const vstext = new THREE.Mesh( geometry, matLite );
+		vstext.position.set(0, 0, 35);
+		vstext.rotation.x = -PI_s.M_PI_2;
+		scene.add( vstext );
 	} ); //end load function
 
+var left_font = new FontLoader();
+var right_font = new FontLoader();
+
+var left_nick: THREE.Mesh;
+var right_nick: THREE.Mesh;
+// vstext.name = "vstext";
+
+function change_names(left_name, right_name)
+{
+	left_font.load("../fonts/Retro_Stereo_Wide_Regular.json",
+	// onLoad callback
+	function ( font ) {
+
+		const selectedObject = scene.getObjectByName("left_nick");
+
+		if (selectedObject)
+		{
+		// console.log("out load fct :" + selectedObject.name);
+		(selectedObject as any).geometry.dispose();
+		(selectedObject as any).material.dispose();
+		scene.remove(selectedObject);
+		}
+
+		const color = 0x61e8fa;
+		const matLite = new THREE.MeshBasicMaterial( {
+			color: color,
+			transparent: true,
+			opacity: 0.4,
+			side: THREE.DoubleSide
+		} );
+
+		var message = left_name;
+
+		const shapes = font.generateShapes( message, 5 );
+
+		const geometry = new THREE.ShapeGeometry( shapes );
+
+		geometry.computeBoundingBox();
+
+		const xMid = - 0.5 * ( geometry.boundingBox.max.x - geometry.boundingBox.min.x );
+
+		geometry.translate( xMid, 0, 0 );
+
+		// make shape ( N.B. edge view not visible )
+
+		left_nick = new THREE.Mesh( geometry, matLite );
+		left_nick.position.z = - 150;
+		left_nick.name = "left_nick";
+		left_nick.position.set(-40, 0, 35);
+		left_nick.rotation.x = -PI_s.M_PI_2;
+		scene.add( left_nick );
+		// console.log("In load fct :" + left_nick.name);
+	} );
+
+	right_font.load("../fonts/Retro_Stereo_Wide_Regular.json",
+	// onLoad callback
+	function ( font ) {
+
+		const selectedObject = scene.getObjectByName("right_nick");
+
+		if (selectedObject)
+		{
+		// console.log("out load fct :" + selectedObject.name);
+		(selectedObject as any).geometry.dispose();
+		(selectedObject as any).material.dispose();
+		scene.remove(selectedObject);
+		}
+
+		const color = 0xfc53bc;
+		const matLite = new THREE.MeshBasicMaterial( {
+			color: color,
+			transparent: true,
+			opacity: 0.4,
+			side: THREE.DoubleSide
+		} );
+
+		var message = right_name;
+
+		const shapes = font.generateShapes( message, 5 );
+
+		const geometry = new THREE.ShapeGeometry( shapes );
+
+		geometry.computeBoundingBox();
+
+		const xMid = - 0.5 * ( geometry.boundingBox.max.x - geometry.boundingBox.min.x );
+
+		geometry.translate( xMid, 0, 0 );
+
+		// make shape ( N.B. edge view not visible )
+
+		right_nick = new THREE.Mesh( geometry, matLite );
+		right_nick.position.z = - 150;
+		right_nick.name = "right_nick";
+		right_nick.position.set(40, 0, 35);
+		right_nick.rotation.x = -PI_s.M_PI_2;
+		scene.add( right_nick );
+		// console.log("In load fct :" + right_nick.name);
+	} );
+}
+
+// change_names(left_name, right_name);
+
+// left_name = "";
+// change_names(left_name, right_name);
 
 
+// left_name = "wesfghjgftdgbvfd";
+// change_names(left_name, right_name);
+/*
+const selectedObject = scene.getObjectByName("vstext");
+console.log("out load fct :" + selectedObject.name);
 
+scene.remove(selectedObject);
+*/
+// change_names(left_name, right_name);
 
-
-
-
-
-var vs_text = new TextSprite({
-  text: "VS",
-  fontFamily: "Arial, Helvetica, sans-serif",
-  fontSize: 5,
-  color: "#ffffff",
-});
-vs_text.position.set(0, -5, 29);
-scene.add(vs_text);
+// var vs_text = new TextSprite({
+//   text: "VS",
+//   fontFamily: "Arial, Helvetica, sans-serif",
+//   fontSize: 5,
+//   color: "#ffffff",
+// });
+// vs_text.position.set(0, -5, 29);
+// scene.add(vs_text);
 
 function Launch_Game(buttons: any)
 {
@@ -635,25 +694,7 @@ function Launch_Game(buttons: any)
 // Right_user.text = "";
 
 socket.on("update_usernames", (names: any) => {
-  let Left_user = new TextSprite({
-    text: names.left_user,
-    alignment: "left",
-    fontFamily: "Arial, Helvetica, sans-serif",
-    fontSize: 5,
-    color: "#61e8fa",
-  });
-  Left_user.position.set(-40, -5, 29);
-  scene.add(Left_user);
-
-  let Right_user = new TextSprite({
-    text: names.right_user,
-    alignment: "right",
-    fontFamily: "Arial, Helvetica, sans-serif",
-    fontSize: 5,
-    color: "#fc53bc",
-  });
-  Right_user.position.set(40, -5, 29);
-  scene.add(Right_user);
+	change_names(names.left_user, names.right_user);
 });
 
 socket.on("change_ball_color", (i: number) => {
