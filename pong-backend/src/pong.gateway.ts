@@ -175,6 +175,14 @@ export class PongGateway
 			console.log(client.id + " was not in matchmaking");
 	};
 
+	@SubscribeMessage('leave_spec')
+	async leave_spec(client: Socket, user_to_watch)
+	{
+		let spec_sock_id = nick_socket.get(user_to_watch);
+		console.log("spec_sock_id = " + spec_sock_id);
+		client.leave(socket_infos.get(spec_sock_id).room);
+	};
+
 	@SubscribeMessage('get_player_list')
 	async get_player_list(client: Socket)
 	{

@@ -147,6 +147,8 @@ var join_normal_match = document.getElementById("Normal_Match");
 var join_bonus_match = document.getElementById("Bonus_Match");
 var leave_match = document.getElementById("Leave_Matchmaking");
 
+var leave_spec = document.getElementById("Leave_spec_Btn");
+
 var loader = document.getElementById("loader");
 
 
@@ -155,6 +157,7 @@ join_spec_buttons.addEventListener('click', launch_spectate, false);
 join_normal_match.addEventListener('click', launch_normal_matchmaking, false);
 join_bonus_match.addEventListener('click', launch_bonus_matchmaking, false);
 leave_match.addEventListener('click', leave_matchmaking, false);
+leave_spec.addEventListener('click', leave_spectate, false);
 
 function launch_spectate()
 {
@@ -166,7 +169,18 @@ function launch_spectate()
 		console.log("You are willing to watch " + spec_nickname);
 		user_to_watch = spec_nickname;
 		Launch_Game(buttons);
+		document.getElementById("Leave_spec_Btn").style.display = 'block';
 	}
+}
+
+function leave_spectate()
+{
+	document.getElementById("Leave_spec_Btn").style.display = 'none';
+	show_ui();
+
+	socket.emit("leave_spec", user_to_watch);
+
+	user_to_watch = "";
 }
 
 function add_to_select(selectobject: any, value: string, id: string)
@@ -506,6 +520,8 @@ function Launch_Game(buttons: any)
 socket.on("update_usernames", (names: any) => {
 	change_names(scene, names.left_user, names.right_user, PI_s);
 	update_leave_message(scene, "", PI_s, -1);
+	bonus_s.bonus.position.y = -50;
+	bonus_s.bonus_outline.position.y = -50;
 });
 
 socket.on("change_ball_color", (i: number) => {
