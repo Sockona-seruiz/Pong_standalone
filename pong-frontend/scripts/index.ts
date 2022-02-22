@@ -240,6 +240,8 @@ function launch_normal_matchmaking()
 	if (nickname == "")
 	{
 		console.log("Game won't launch");
+		(document.getElementById('nickname')as any).placeholder = "Nickname already taken";
+		(document.getElementById('nickname')as any).value = "";
 		return ;
 	}
 	buttons.GameMode = "Normal Game";
@@ -255,6 +257,8 @@ function launch_bonus_matchmaking()
 	if (nickname == "")
 	{
 		console.log("Game won't launch");
+		(document.getElementById('nickname')as any).placeholder = "Nickname allready taken";
+		(document.getElementById('nickname')as any).value = "";
 		return ;
 	}
 	buttons.GameMode = "Bonus Game";
