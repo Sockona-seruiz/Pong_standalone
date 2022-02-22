@@ -29,7 +29,7 @@ import { updateplane } from "./update_plane";
 import { ft_ending_fireworks, launchFirework } from "./fireworks";
 
 import * as io from "socket.io-client";
-import { change_names, init_vs_text } from './update_text';
+import { change_names, init_vs_text, update_leave_message } from './update_text';
 import { init_stars } from './stars_init';
 import { init_bonus, spawn_bonus } from './bonus';
 import { bonus_taken } from './bonus';
@@ -505,6 +505,7 @@ function Launch_Game(buttons: any)
 
 socket.on("update_usernames", (names: any) => {
 	change_names(scene, names.left_user, names.right_user, PI_s);
+	update_leave_message(scene, "", PI_s, -1);
 });
 
 socket.on("change_ball_color", (i: number) => {
@@ -570,26 +571,30 @@ socket.on("update_score", (scores: any) => {
 });
 
 socket.on("User_disconected", (name: string) => {
-  let deco_text = new TextSprite({
-    text: name + " left the match...",
-    fontFamily: "Arial, Helvetica, sans-serif",
-    fontSize: 5,
-    color: "#ffffff"
-  });
-  deco_text.position.set(0, +10, 0);
-  scene.add(deco_text);
+//   let deco_text = new TextSprite({
+//     text: name + " left the match...",
+//     fontFamily: "Arial, Helvetica, sans-serif",
+//     fontSize: 5,
+//     color: "#ffffff"
+//   });
+//   deco_text.position.set(0, +10, 0);
+//   scene.add(deco_text);
+  update_leave_message(scene, name, PI_s, 0);
   show_ui();
 });
 
 socket.on("End_of_match", (winner: any) => {
-  let winner_text = new TextSprite({
-    text: winner.name + " won the match !",
-    fontFamily: "Arial, Helvetica, sans-serif",
-    fontSize: 5,
-    color: "#ffffff"
-  });
-  winner_text.position.set(0, +10, 0);
-  scene.add(winner_text);
+//   let winner_text = new TextSprite({
+//     text: winner.name + " won the match !",
+//     fontFamily: "Arial, Helvetica, sans-serif",
+//     fontSize: 5,
+//     color: "#ffffff"
+//   });
+//   winner_text.position.set(0, +10, 0);
+//   scene.add(winner_text);
+
+  update_leave_message(scene, winner.name, PI_s, 1);
+
   show_ui();
   ft_ending_fireworks(winner.pos, winner.color, ball_s, paddles_s, scene);
 });

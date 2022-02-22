@@ -123,8 +123,8 @@ export class PongGateway
 				if (room_match_info.get(player_room).game_done != 1) //Le joeur était en game et elle était en cours
 				{
 					//reset user_in_game.set(client.id, -1); pour les DEUX joueurs
-					user_in_game.set(room_match_info.get(player_room).player_0_socket, -1);
-					user_in_game.set(room_match_info.get(player_room).player_1_socket, -1);
+					user_in_game.set(room_match_info.get(player_room).player_0_socket.id, -1);
+					user_in_game.set(room_match_info.get(player_room).player_1_socket.id, -1);
 
 					room_match_info.get(player_room).game_done  = 1;//On met fin à la game
 					console.log("Game socket = " + player_room);
@@ -132,31 +132,6 @@ export class PongGateway
 					this.server.to(player_room).emit("User_disconected", socket_nick.get(client.id));
 
 					console.log("A user LEFT A RUNNING MATCH");
-
-
-					// console.log(room_match_info.get(socket_id.get(users_id.get(client.id)))[4]);
-
-					// let data_picker = socket_id.get(users_id.get(client.id));
-					//Remettre le deux user Online
-					// await this.userService.changeStatus(room_match_info.get(data_picker)[6], Status.Online);
-					// await this.userService.changeStatus(room_match_info.get(data_picker)[7], Status.Online);
-
-
-					//Determine le gagnant (pas forcement utile car pas de stockage de données)
-					// let win_0 = false;
-					// let win_1 = false;
-
-					// if (room_match_info.get(data_picker)[4].id == client.id)
-					// 	win_1 = true;
-					// else
-					// 	win_0 = true;
-
-					// room_match_info.get(data_picker).push(1);
-					////////////////////////////////////////////////////////////////////////////
-
-					// let return_tab: UpdateMatchDTO = {winner_0: win_0, points_0: room_match_info.get(data_picker)[2], userId_0: room_match_info.get(data_picker)[6],
-					// 	winner_1 : win_1, points_1: room_match_info.get(data_picker)[3], userId_1: room_match_info.get(data_picker)[7], game_mode: room_match_info.get(data_picker)[8]};
-					// this.MatchService.createMatch(return_tab);
 				}
 				index_of_game_room = game_rooms.indexOf(player_room);
 				game_rooms.splice(index_of_game_room, 1);
