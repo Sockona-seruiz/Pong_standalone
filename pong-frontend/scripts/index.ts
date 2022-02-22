@@ -234,6 +234,8 @@ function clear_select(selectobject: any)
 
 function launch_normal_matchmaking()
 {
+	if (document.getElementById("Normal_Match").style.cursor == 'not-allowed')
+		return;
 	const nickname = check_nickname();
 	if (nickname == "")
 	{
@@ -247,6 +249,8 @@ function launch_normal_matchmaking()
 
 function launch_bonus_matchmaking()
 {
+	if (document.getElementById("Bonus_Match").style.cursor == 'not-allowed')
+		return;
 	const nickname = check_nickname();
 	if (nickname == "")
 	{
@@ -558,13 +562,25 @@ socket.on("show_ui", (infos: any) =>
 socket.on("hide_loader", (infos: any) =>
 {
 	console.log("hide loader");
-	document.getElementById("loader").style.display = 'none';
+
+	document.getElementById("Normal_Match").style.cursor = 'default';
+	document.getElementById("Normal_Match").style.opacity = '1';
+	document.getElementById("Bonus_Match").style.cursor = 'default';
+	document.getElementById("Bonus_Match").style.opacity = '1';
+
+	document.getElementById("leave_match").style.display = 'none';
 });
 
 socket.on("show_loader", (infos: any) =>
 {
 	console.log("show loader");
-	document.getElementById("loader").style.display = 'inline-block';
+
+	document.getElementById("Normal_Match").style.cursor = 'not-allowed';
+	document.getElementById("Normal_Match").style.opacity = '0.6';
+	document.getElementById("Bonus_Match").style.cursor = 'not-allowed';
+	document.getElementById("Bonus_Match").style.opacity = '0.6';
+
+	document.getElementById("leave_match").style.display = 'inline-block';
 });
 
 socket.on("spawn_bonus", (infos: any) =>
