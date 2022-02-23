@@ -4,7 +4,7 @@ export function init_plane(scene: THREE.Scene)
 {
 	var Floorcol = 0x8108ff;
 	var M_PI_2 = Math.PI / 2;
-	var planeGeometry = new THREE.PlaneGeometry(600, 300, 40, 20);
+	var planeGeometry = new THREE.PlaneGeometry(500, 400, 40, 20);
 	var planeMaterial = new THREE.MeshPhongMaterial({
 		color: Floorcol,
 		side: THREE.DoubleSide,
@@ -12,7 +12,7 @@ export function init_plane(scene: THREE.Scene)
 		emissive : Floorcol,
 		emissiveIntensity : 2.5,
 	});
-	var UnderplaneGeometry = new THREE.PlaneGeometry(700, 350, 2, 2);
+	var UnderplaneGeometry = new THREE.PlaneGeometry(550, 450, 2, 2);
 
     var loader = new THREE.TextureLoader();
     var texture = loader.load( 'textures/gradient_blue_pink.png' );
@@ -29,13 +29,13 @@ export function init_plane(scene: THREE.Scene)
     var Underplane_msh = new THREE.Mesh(UnderplaneGeometry, UnderplaneMaterial);
 	plane_msh.rotation.x += M_PI_2;
 	Underplane_msh.rotation.x += M_PI_2;
-	plane_msh.position.set(0, -10, -100);
-	Underplane_msh.position.set(0, -18, -100);
+	plane_msh.position.set(0, -20, -100);
+	Underplane_msh.position.set(0, -28, -100);
 	scene.add(plane_msh, Underplane_msh);
 
 	var plane_seed_rd = [];
 	for(let i = 0; i < plane_msh.geometry.attributes.position.count; i++){
-		plane_seed_rd.unshift(Math.random() * (1 + 1) - 1);
+		plane_seed_rd.unshift(Math.random() * (1 + 1.2) - 1.2);
 	}
 
 	let plane_s = {

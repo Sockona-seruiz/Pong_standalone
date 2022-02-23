@@ -223,8 +223,8 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   1000
 );
-camera.position.z = 30;
-camera.position.y = 43;
+camera.position.z = 34;
+camera.position.y = 50;
 camera.rotation.x = -0.86;
 
 //Render =====
