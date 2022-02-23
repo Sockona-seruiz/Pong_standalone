@@ -1,5 +1,7 @@
 import * as THREE from 'three'
 
+var lauch_end_fireworks = true;
+
 function sleep(ms: number)	{
 	return new Promise(resolve => setTimeout(resolve, ms));
 	}
@@ -100,6 +102,7 @@ export function launchFirework(scene: THREE.Scene, x: number, y: number, z: numb
 }
 
 export async function ft_ending_fireworks(pos: any, color: any, ball_s: any, paddles_s: any, scene: any) {
+	lauch_end_fireworks = true;
 	while (ball_s.trainee_msh.length > 0) {
 	  scene.remove(ball_s.trainee_msh[ball_s.trainee_msh.length - 1]);
 	  ball_s.trainee_msh.pop();
@@ -112,13 +115,18 @@ export async function ft_ending_fireworks(pos: any, color: any, ball_s: any, pad
 	let rdX: number;
 	let rdZ: number;
   
-	while (1) {
+	while (lauch_end_fireworks == true) {
 	  rdX = getRandomInt(-60, 60);
 	  rdZ = getRandomInt(-30, 40);
 	  launchFirework(scene, rdX, 0, rdZ, 20, 25, color);
 	  await sleep(getRandomInt(1500, 2000));
 	}
-  }
+  };
+
+  export function stop_ending_fireworks()
+  {
+	lauch_end_fireworks = false;
+  };
 
   function getRandomInt(min: any, max: any) {
 	min = Math.ceil(min);

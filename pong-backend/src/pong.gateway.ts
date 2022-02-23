@@ -10,7 +10,6 @@ import { Socket, Server } from "socket.io";
 // import { UserService } from "src/user/user.service";
 // import { MatchService } from './match.service';
 
-
 //Creer une room DE TOUT LES USERS LOG IN pour pouvoir emit la nouvelle liste de gens à spec
 
 var users_in_matchmaking_0 : Socket [];
@@ -60,7 +59,27 @@ var PI_s =
 	M_2PI : 2 * Math.PI,
 	M_PI_2 : Math.PI / 2,
 	M_3PI_2 : 3 * (Math.PI / 2)
-}
+};
+
+var score_limit = 7;
+
+let arena_config = {
+	arena_w: 100,
+	arena_w_2: 0,
+	arena_h: 50,
+	arena_h_2: 0,
+	arena_size: 0,
+  
+	paddle_w: 1,
+	paddle_h: 10,
+	paddle_h_2: 0,
+  };
+
+  arena_config.paddle_h_2 = arena_config.paddle_h / 2;
+  arena_config.arena_h_2 = arena_config.arena_h / 2;
+  arena_config.arena_w_2 = arena_config.arena_w / 2;
+
+  console.log("arena_config.arena_w = " + arena_config.arena_w);
 
 @WebSocketGateway(
 	{
@@ -84,7 +103,7 @@ export class PongGateway
 
 	handleConnection(client: Socket)
 	{
-		this.server.emit("send_user_list");
+		this.get_player_list(client);
 
 		console.log (client.id + " has join the server");
 		users_key_status.set(client.id, 0);
@@ -233,23 +252,19 @@ export class PongGateway
 	@SubscribeMessage('launch_game')
 	async launch_game(client: Socket, config)
 	{
-		//But : supprimer occurences username / login et les remplacer par nickname
-		console.log(client.id + " aka " + config.login + " trys to launch game, gamemode : " + config.mode + " vs " + config.duel);
-		users_id.set(client.id, config.login);
-		users_name.set(client.id, config.username);
-		socket_id.set(config.login, client.id);
+		console.log(client.id + " aka " + config.nickname + " trys to launch game, gamemode : " + config.mode);
+		users_id.set(client.id, config.nickname);
+		users_name.set(client.id, config.nickname);
+		socket_id.set(config.nickname, client.id);
 
 		socket_nick.set(client.id, config.nickname);
 		nick_socket.set(config.nickname, client.id);
 
 		let launch_game = -1;
 
-		//Won't be used here I think (maybe send a list to client with all games idk then show it in the ui)
-		//Will be used config.spec == nickname to spectate
-		console.log(config.spec);
 		if (config.spec != "")
 		{
-			console.log(client.id + " is willing to watch |" + config.spec + "|");
+			console.log(client.id + " is willing to spec " + config.spec);
 			let spec_sock_id = nick_socket.get(config.spec);
 			console.log("spec_sock_id = " + spec_sock_id);
 
@@ -272,14 +287,14 @@ export class PongGateway
 			return ;
 		}
 		
-		duels.set(config.login, config.duel);
-		duels_mode.set(config.login, config.mode);
-		duels_waiting_room.set(config.login, client);
+		duels.set(config.nickname, config.duel);
+		duels_mode.set(config.nickname, config.mode);
+		duels_waiting_room.set(config.nickname, client);
 		//Duels, won't be used
 		if (config.duel != null)
 		{
 			var duel_game_mode = 0;
-			if (duels.get(config.duel) == config.login)
+			if (duels.get(config.duel) == config.nickname)
 			{
 				if (config.mode != duels_mode.get(config.duel))
 				{
@@ -297,9 +312,9 @@ export class PongGateway
 				players[0] = duels_waiting_room.get(config.duel);
 				players[1] = client;
 
-				duels.delete(config.login);
-				duels_mode.delete(config.login);
-				duels_waiting_room.delete(config.login);
+				duels.delete(config.nickname);
+				duels_mode.delete(config.nickname);
+				duels_waiting_room.delete(config.nickname);
 
 				duels.delete(config.duel);
 				duels_mode.delete(config.duel);
@@ -308,7 +323,7 @@ export class PongGateway
 				players[0].join(players[0].id);
 				players[1].join(players[0].id);
 
-				socket_id.set(config.login, players[0].id);
+				socket_id.set(config.nickname, players[0].id);
 
 			}
 			else
@@ -352,7 +367,7 @@ export class PongGateway
 				players[0].join(players[0].id);
 				players[1].join(players[0].id);
 
-				// socket_id.set(config.login, players[0].id);
+				// socket_id.set(config.nickname, players[0].id);
 			}
 
 			else if (users_in_matchmaking_1.length >= 2) // Bonus game
@@ -379,7 +394,7 @@ export class PongGateway
 				players[0].join(players[0].id);
 				players[1].join(players[0].id);
 
-				// socket_id.set(config.login, players[0].id);
+				// socket_id.set(config.nickname, players[0].id);
 			}
 		}
 
@@ -448,18 +463,18 @@ export class PongGateway
 			{
 				paddle_l_pos_z : 0,
 				paddle_r_pos_z : 0,
-				paddle_l_pos_x : 0,
-				paddle_r_pos_x : 0,
-				paddle_l_h_2: 0,
-				paddle_r_h_2 : 0,
+				paddle_l_pos_x : -(arena_config.arena_w / 2 - 5),
+				paddle_r_pos_x : arena_config.arena_w / 2 - 5,
+				paddle_l_h_2: arena_config.paddle_h_2,
+				paddle_r_h_2 : arena_config.paddle_h_2,
 				bonus_owner: -1,
 
-				arena_top_pos : 0,
-				arena_bot_pos : 0,
+				arena_top_pos : -arena_config.arena_h_2 + 1,
+				arena_bot_pos : arena_config.arena_h_2 - 1,
 				arena_bot_pos_2 : 0,
 			
-				arena_left_pos : 0,
-				arena_right_pos : 0,
+				arena_left_pos : -arena_config.arena_w_2 + 1,
+				arena_right_pos : arena_config.arena_w_2 - 1,
 				arena_right_pos_2 : 0,
 				ball_pos_x : 0,
 				ball_pos_z : 0,
@@ -480,23 +495,13 @@ export class PongGateway
 				bonus_pos_z: 0,
 				bonus_counter: 0
 			}
-
-			positions.paddle_l_pos_x = config.plx;
-			positions.paddle_r_pos_x = config.prx;
-			positions.paddle_l_h_2 = config.ph_2;
-			positions.paddle_r_h_2 = config.ph_2;
-			positions.arena_top_pos = config.at;
-			positions.arena_bot_pos = config.ab;
-			positions.arena_bot_pos_2 = config.ab/2;
-			positions.arena_left_pos = config.al;
-			positions.arena_right_pos = config.ar;
-			positions.arena_right_pos_2 = config.ar/2;
+			positions.arena_bot_pos_2 = positions.arena_bot_pos/2;
+			positions.arena_right_pos_2 = positions.arena_right_pos/2;
 
 			positions.bonus_counter = getRandomInt(500, 1000);
 
 			let win = -1;
 			//CHANGE SCORE LIMIT HERE
-			let score_limit = 99;
 
 			while (win == -1 && match_infos.game_done != 1)// != 1 pour terminer le match
 			{

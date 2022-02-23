@@ -140,13 +140,16 @@ export function init_audio(scene: THREE.Scene, BLOOM_SCENE: number, config: {
 
 export function updateCurrentSong(audio_s:any, SongToogle: boolean, Songname:string, change_track: boolean)
 {
+	console.log("Update Current Song");
 	if (change_track == true)
 	{
+		console.log("Change track == true");
 		audio_s.THREE_Audio.stop();
 		if (Songname == 'Flyday Chinatown')
 		{
 			if (SongToogle == false)
 			{
+				console.log("Son Toggle == false");
 				audio_s.audioLoader.load(audiolist[0], (buffer: AudioBuffer) => {
 					audio_s.THREE_Audio.setBuffer(buffer);
 					audio_s.THREE_Audio.setLoop(true);
@@ -155,6 +158,7 @@ export function updateCurrentSong(audio_s:any, SongToogle: boolean, Songname:str
 			}
 			else
 			{
+				console.log("Son Toggle == true");
 			audio_s.audioLoader.load(audiolist[0], (buffer: AudioBuffer) => {
 				audio_s.THREE_Audio.setBuffer(buffer);
 				audio_s.THREE_Audio.setLoop(true);
@@ -166,6 +170,7 @@ export function updateCurrentSong(audio_s:any, SongToogle: boolean, Songname:str
 		{
 			if (SongToogle == false)
 			{
+				console.log("Son Toggle == false");
 				audio_s.audioLoader.load(audiolist[1], (buffer: AudioBuffer) => {
 					audio_s.THREE_Audio.setBuffer(buffer);
 					audio_s.THREE_Audio.setLoop(true);
@@ -174,6 +179,7 @@ export function updateCurrentSong(audio_s:any, SongToogle: boolean, Songname:str
 			}
 			else
 			{
+				console.log("Son Toggle == true");
 				audio_s.audioLoader.load(audiolist[1], (buffer: AudioBuffer) => {
 					audio_s.THREE_Audio.setBuffer(buffer);
 					audio_s.THREE_Audio.setLoop(true);
@@ -184,7 +190,13 @@ export function updateCurrentSong(audio_s:any, SongToogle: boolean, Songname:str
 		return ;
 	}
 	else if (SongToogle == false)
+	{
+		console.log("Change track == false");
 		audio_s.THREE_Audio.pause();
-	else
+	}
+	else if (SongToogle == true)
+	{
+		console.log("Change track == false");
 		audio_s.THREE_Audio.play();
+	}
 }

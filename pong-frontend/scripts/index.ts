@@ -10,7 +10,6 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { FontLoader } from "three/examples/jsm/loaders/FontLoader";
 
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry";
-import TextSprite from "@seregpie/three.text-sprite";
 
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min';
 
@@ -26,7 +25,7 @@ import { init_plane } from "./plane_init";
 import { moveSun } from "./update_sun";
 import { updateAudioVisualizer } from "./update_audio";
 import { updateplane } from "./update_plane";
-import { ft_ending_fireworks, launchFirework } from "./fireworks";
+import { ft_ending_fireworks, launchFirework, stop_ending_fireworks } from "./fireworks";
 
 import * as io from "socket.io-client";
 import { change_names, init_vs_text, update_leave_message } from './update_text';
@@ -43,14 +42,11 @@ socket = io.connect("http://localhost:3000", { withCredentials: true });
 
 socket.on("connect", () => {
   console.log("Successfully connected to the newsocket game ");
-  //Waiting for another player to connect (enter matchmaking)
 });
 
 socket.on("disconnect", () => {
   console.log("Disconnected to newsocket game ");
 });
-
-// var token = localStorage.getItem("token");
 
 const GameMode = localStorage.getItem("mode");
 let UserId = localStorage.getItem("id");
@@ -109,37 +105,10 @@ socket.on("send_user_list", (users: any) => {
 		users_in_game = [];
 });
 
-function get_in_game_user_list ()
-{
-	socket.emit("get_player_list");
-};
-
-//Config Ui
-
-
-let default_buttons = {
-	Nickname: "user",
-	GameMode: 'Normal Game',
-	SongToogle: true,
-	Song: 'Flyday Chinatown',
-	LaunchGame: false,
-}
-
 let buttons = {
 	Nickname: "user",
 	GameMode: 'Normal Game',
-	SongToogle: true,
-	Song: 'Flyday Chinatown',
-	LaunchGame: false,
-	userLabel: ["user"],
 };
-
-// var html_buttons = document.getElementsByTagName('button');
-
-// for (let i = 0; i < html_buttons.length; i++)
-// {
-//   html_buttons[i].addEventListener('click', onButtonClick, false);
-// };
 
 var join_spec_buttons = document.getElementById("launch_spec");
 
@@ -148,9 +117,6 @@ var join_bonus_match = document.getElementById("Bonus_Match");
 var leave_match = document.getElementById("Leave_Matchmaking");
 
 var leave_spec = document.getElementById("Leave_spec_Btn");
-
-var loader = document.getElementById("loader");
-
 
 join_spec_buttons.addEventListener('click', launch_spectate, false);
 
@@ -213,11 +179,6 @@ function check_nickname()
 	return (nickname);
 };
 
-function hide_ui()
-{
-	document.getElementById("Ui").style.display = 'none';
-};
-
 function show_ui()
 {
 	document.getElementById("Ui").style.display = 'inline-block';
@@ -269,17 +230,6 @@ function launch_bonus_matchmaking()
 function leave_matchmaking()
 {
 	socket.emit('QuitMactchmaking');
-};
-
-get_in_game_user_list ();
-
-const gui = new GUI();
-setupGui();
-
-function setupGui()
-{
-	gui.add( buttons, 'SongToogle' ).name( 'Toogle song' ).onChange( console.log("Song " + buttons.SongToogle) );
-	gui.add( buttons, 'Song', ['Flyday Chinatown', 'Soda City Funk'] ).name('Select Song' ).onChange( console.log("Change sont to : " + buttons.Song) );
 };
 
 var canResetCam = false;
@@ -407,6 +357,32 @@ var Rightcol = 0xff13a5;
 
 var audio_s = init_audio(scene, BLOOM_SCENE, config);
 
+//GUI SETUP=====================
+const song_btn =
+{
+	song_toogle: true,
+	song: 'Flyday Chinatown',
+	old_song: 'Flyday Chinatown'
+}
+
+const gui = new GUI();
+
+gui.add( song_btn, 'song_toogle' ).name( 'Toogle song' );
+gui.add( song_btn, 'song', ['Flyday Chinatown', 'Soda City Funk'] ).name('Select Song' );
+
+gui.onChange( event =>
+{
+	console.log(song_btn.song_toogle);    // object that was modified
+	console.log(song_btn.song);  // string, name of property
+	if (song_btn.song != song_btn.old_song)
+	{
+		updateCurrentSong(audio_s, song_btn.song_toogle, song_btn.song, true);
+		song_btn.old_song = song_btn.song;
+	}
+	else
+		updateCurrentSong(audio_s, song_btn.song_toogle, song_btn.song, false);
+} );
+
 //Sun =====
 var IncreaseBrightness: boolean = true;
 var SunMesh: THREE.Group;
@@ -511,8 +487,6 @@ function Launch_Game(buttons: any)
 	socket.emit("launch_game", {
 	  spec: user_to_watch,
 	  mode: buttons.GameMode,
-	  login: buttons.Nickname,
-	  username: buttons.Nickname,
 	  nickname: buttons.Nickname,
 	  duel: DuelId,
 	  plx: -(config.arena_w / 2 - 5),
@@ -526,6 +500,7 @@ function Launch_Game(buttons: any)
 };
 
 socket.on("update_usernames", (names: any) => {
+	stop_ending_fireworks();
 	change_names(scene, names.left_user, names.right_user, PI_s);
 	update_leave_message(scene, "", PI_s, -1);
 	bonus_s.bonus.position.y = -50;
@@ -607,28 +582,11 @@ socket.on("update_score", (scores: any) => {
 });
 
 socket.on("User_disconected", (name: string) => {
-//   let deco_text = new TextSprite({
-//     text: name + " left the match...",
-//     fontFamily: "Arial, Helvetica, sans-serif",
-//     fontSize: 5,
-//     color: "#ffffff"
-//   });
-//   deco_text.position.set(0, +10, 0);
-//   scene.add(deco_text);
   update_leave_message(scene, name, PI_s, 0);
   show_ui();
 });
 
 socket.on("End_of_match", (winner: any) => {
-//   let winner_text = new TextSprite({
-//     text: winner.name + " won the match !",
-//     fontFamily: "Arial, Helvetica, sans-serif",
-//     fontSize: 5,
-//     color: "#ffffff"
-//   });
-//   winner_text.position.set(0, +10, 0);
-//   scene.add(winner_text);
-
   update_leave_message(scene, winner.name, PI_s, 1);
 
   show_ui();
@@ -637,18 +595,6 @@ socket.on("End_of_match", (winner: any) => {
 
 //The render loop ======
 const animate = function () {
-
-	if (buttons.SongToogle != default_buttons.SongToogle || buttons.Song != default_buttons.Song)
-	{
-		let change_track =  false;
-		if (buttons.Song != default_buttons.Song)
-			change_track = true;
-		default_buttons.SongToogle = buttons.SongToogle;
-		default_buttons.Song = buttons.Song;
-		console.log("Update Song");
-		updateCurrentSong(audio_s, buttons.SongToogle, buttons.Song, change_track);
-	}
-
   canResetCam = true;
   requestAnimationFrame(animate);
 
