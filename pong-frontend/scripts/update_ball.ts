@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 
-export function move_ball(scene, ball_s: any, positions: any, paddles_s: any, BLOOM_SCENE: number, PI_s: any)
+export function move_ball(scene: THREE.Scene, ball_s: any, positions: any, paddles_s: any, BLOOM_SCENE: number, PI_s: any)
 {
 	ball_s.ball.position.x = positions.bpx;
 	ball_s.ball.position.z = positions.bpz;

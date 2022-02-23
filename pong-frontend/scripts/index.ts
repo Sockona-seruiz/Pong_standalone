@@ -8,6 +8,7 @@ import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPa
 
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
+// @ts-ignore
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min';
 
 import { init_score } from "./score_init";
@@ -93,13 +94,13 @@ let buttons = {
 };
 
 //Buttons setup / clic functions
-var join_spec_buttons = document.getElementById("launch_spec");
+var join_spec_buttons: any = document.getElementById("launch_spec");
 
-var join_normal_match = document.getElementById("Normal_Match");
-var join_bonus_match = document.getElementById("Bonus_Match");
-var leave_match = document.getElementById("Leave_Matchmaking");
+var join_normal_match: any = document.getElementById("Normal_Match");
+var join_bonus_match: any = document.getElementById("Bonus_Match");
+var leave_match: any = document.getElementById("Leave_Matchmaking");
 
-var leave_spec = document.getElementById("Leave_spec_Btn");
+var leave_spec: any = document.getElementById("Leave_spec_Btn");
 
 join_spec_buttons.addEventListener('click', launch_spectate, false);
 
@@ -118,13 +119,13 @@ function launch_spectate()
 		// console.log("You are willing to watch " + spec_nickname);
 		user_to_watch = spec_nickname;
 		Launch_Game(buttons);
-		document.getElementById("Leave_spec_Btn").style.display = 'block';
+		(document.getElementById("Leave_spec_Btn")as any).style.display = 'block';
 	}
 }
 
 function leave_spectate()
 {
-	document.getElementById("Leave_spec_Btn").style.display = 'none';
+	(document.getElementById("Leave_spec_Btn")as any).style.display = 'none';
 	show_ui();
 
 	socket.emit("leave_spec", user_to_watch);
@@ -162,7 +163,7 @@ function check_nickname()
 
 function show_ui()
 {
-	document.getElementById("Ui").style.display = 'inline-block';
+	(document.getElementById("Ui")as any).style.display = 'inline-block';
 };
 
 function clear_select(selectobject: any)
@@ -176,7 +177,7 @@ function clear_select(selectobject: any)
 
 function launch_normal_matchmaking()
 {
-	if (document.getElementById("Normal_Match").style.cursor == 'not-allowed')
+	if ((document.getElementById("Normal_Match")as any).style.cursor == 'not-allowed')
 		return;
 	const nickname = check_nickname();
 	if (nickname == "")
@@ -193,7 +194,7 @@ function launch_normal_matchmaking()
 
 function launch_bonus_matchmaking()
 {
-	if (document.getElementById("Bonus_Match").style.cursor == 'not-allowed')
+	if ((document.getElementById("Bonus_Match")as any).style.cursor == 'not-allowed')
 		return;
 	const nickname = check_nickname();
 	if (nickname == "")
@@ -352,7 +353,7 @@ gui.add( song_btn, 'song', ['Flyday Chinatown', 'Soda City Funk'] ).name('Select
 gui.add( song_btn, 'song_toogle' ).name( 'Toogle song' );
 
 //Toggle song / change song trigger
-gui.onChange( event =>
+gui.onChange( () =>
 {
 	// console.log(song_btn.song_toogle);    // object that was modified
 	// console.log(song_btn.song);  // string, name of property
@@ -513,36 +514,36 @@ socket.on("update_positions", (positions: any) => {
 
 socket.on("hide_ui", (infos: any) =>
 {
-	document.getElementById("Ui").style.display = 'none';
+	(document.getElementById("Ui")as any).style.display = 'none';
 });
 
 socket.on("show_ui", (infos: any) =>
 {
-	document.getElementById("Ui").style.display = 'inline-block';
+	(document.getElementById("Ui")as any).style.display = 'inline-block';
 });
 
 socket.on("hide_loader", (infos: any) =>
 {
 	// console.log("hide loader");
 
-	document.getElementById("Normal_Match").style.cursor = 'default';
-	document.getElementById("Normal_Match").style.opacity = '1';
-	document.getElementById("Bonus_Match").style.cursor = 'default';
-	document.getElementById("Bonus_Match").style.opacity = '1';
+	(document.getElementById("Normal_Match") as any).style.cursor = 'default';
+	(document.getElementById("Normal_Match")as any).style.opacity = '1';
+	(document.getElementById("Bonus_Match")as any).style.cursor = 'default';
+	(document.getElementById("Bonus_Match")as any).style.opacity = '1';
 
-	document.getElementById("leave_match").style.display = 'none';
+	(document.getElementById("leave_match")as any).style.display = 'none';
 });
 
 socket.on("show_loader", (infos: any) =>
 {
 	// console.log("show loader");
 
-	document.getElementById("Normal_Match").style.cursor = 'not-allowed';
-	document.getElementById("Normal_Match").style.opacity = '0.6';
-	document.getElementById("Bonus_Match").style.cursor = 'not-allowed';
-	document.getElementById("Bonus_Match").style.opacity = '0.6';
+	(document.getElementById("Normal_Match")as any).style.cursor = 'not-allowed';
+	(document.getElementById("Normal_Match")as any).style.opacity = '0.6';
+	(document.getElementById("Bonus_Match")as any).style.cursor = 'not-allowed';
+	(document.getElementById("Bonus_Match")as any).style.opacity = '0.6';
 
-	document.getElementById("leave_match").style.display = 'inline-block';
+	(document.getElementById("leave_match")as any).style.display = 'inline-block';
 });
 
 socket.on("spawn_bonus", (infos: any) =>

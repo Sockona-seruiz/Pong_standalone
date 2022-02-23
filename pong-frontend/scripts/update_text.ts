@@ -32,7 +32,7 @@ const matLite_white = new THREE.MeshBasicMaterial( {
 	side: THREE.DoubleSide
 } );
 
-export function init_vs_text(scene, PI_s)
+export function init_vs_text(scene: THREE.Scene, PI_s: any)
 {
 	var vs_fontloader = new FontLoader();	
 	vs_fontloader.load(font_path,
@@ -46,7 +46,7 @@ export function init_vs_text(scene, PI_s)
 
 		geometry.computeBoundingBox();
 
-		const xMid = - 0.5 * ( geometry.boundingBox.max.x - geometry.boundingBox.min.x );
+		const xMid = - 0.5 * ( (geometry.boundingBox as any).max.x - (geometry.boundingBox as any).min.x );
 
 		geometry.translate( xMid, 0, 0 );
 
@@ -59,7 +59,7 @@ export function init_vs_text(scene, PI_s)
 	} ); //end load function
 };
 
-export function change_names(scene, left_name, right_name, PI_s)
+export function change_names(scene: THREE.Scene, left_name: string, right_name: string, PI_s: any)
 {
 	left_font.load(font_path,
 	function ( font )
@@ -74,7 +74,7 @@ export function change_names(scene, left_name, right_name, PI_s)
 		const shapes = font.generateShapes( left_name, 5 );
 		const geometry = new THREE.ShapeGeometry( shapes );
 		geometry.computeBoundingBox();
-		const xMid = - 0.5 * ( geometry.boundingBox.max.x - geometry.boundingBox.min.x );
+		const xMid = - 0.5 * ( (geometry.boundingBox as any).max.x - (geometry.boundingBox as any).min.x );
 		geometry.translate( xMid, 0, 0 );
 		left_nick = new THREE.Mesh( geometry, matLite_left );
 		left_nick.position.z = - 150;
@@ -97,7 +97,7 @@ export function change_names(scene, left_name, right_name, PI_s)
 		const shapes = font.generateShapes( right_name, 5 );
 		const geometry = new THREE.ShapeGeometry( shapes );
 		geometry.computeBoundingBox();
-		const xMid = - 0.5 * ( geometry.boundingBox.max.x - geometry.boundingBox.min.x );
+		const xMid = - 0.5 * ( (geometry.boundingBox as any).max.x - (geometry.boundingBox as any).min.x );
 		geometry.translate( xMid, 0, 0 );
 		right_nick = new THREE.Mesh( geometry, matLite_right );
 		right_nick.position.z = - 150;
@@ -108,7 +108,7 @@ export function change_names(scene, left_name, right_name, PI_s)
 	} );
 };
 
-export function update_leave_message(scene, name, PI_s, win)//win == 0 -> Leaver else if win == 1 -> Winner
+export function update_leave_message(scene: THREE.Scene, name: string, PI_s: any, win: number)//win == 0 -> Leaver else if win == 1 -> Winner else if win == -1 remove text
 //win == -1 no text
 {
 	win_font.load(font_path,
@@ -124,13 +124,13 @@ export function update_leave_message(scene, name, PI_s, win)//win == 0 -> Leaver
 			if (win == -1)
 				return;
 			let shapes: THREE.Shape[];
-			if (win == false)
+			if (win == 0)
 				shapes = font.generateShapes( name + " left the match", 4 );
 			else
 				shapes = font.generateShapes( name + " won the match", 4 );
 			const geometry = new THREE.ShapeGeometry( shapes );
 			geometry.computeBoundingBox();
-			const xMid = - 0.5 * ( geometry.boundingBox.max.x - geometry.boundingBox.min.x );
+			const xMid = - 0.5 * ( (geometry.boundingBox as any).max.x - (geometry.boundingBox as any).min.x );
 			geometry.translate( xMid, 0, 0 );
 			win_leave = new THREE.Mesh( geometry, matLite_white );
 			win_leave.position.z = - 150;

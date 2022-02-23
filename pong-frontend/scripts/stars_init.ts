@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 
-export function init_stars(scene, config)
+export function init_stars(scene: THREE.Scene, config: any)
 {
 	const vertices = [];
 

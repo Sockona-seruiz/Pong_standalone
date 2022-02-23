@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 
-var audiolist = [];
+var audiolist: string[] = [];
 	// audiolist.unshift("../sounds/far-cry-3-blood-dragon-ost-power-core-track-07.mp3");
 	// audiolist.unshift('../sounds/dryskill-burnout-dubstep-synthwave.mp3');
 	// audiolist.unshift('../sounds/far-cry-3-blood-dragon-ost-omega-force-track-16.mp3');

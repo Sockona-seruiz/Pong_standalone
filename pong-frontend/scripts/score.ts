@@ -257,7 +257,7 @@ export function updateScore(score_s: {
 	drawfct[rscoreunite](score_s.crystals[3], false, score_s);
 }
 
-export function update_scores(scores: any, score_s: any, scene, ball_s: any, paddles_s: any)
+export function update_scores(scores: any, score_s: any, scene: THREE.Scene, ball_s: any, paddles_s: any)
 {
 score_s.LeftScore = scores.ls;
 score_s.RightScore = scores.rs;
