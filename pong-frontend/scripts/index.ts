@@ -7,9 +7,6 @@ import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass";
 
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { FontLoader } from "three/examples/jsm/loaders/FontLoader";
-
-import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry";
 
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min';
 
@@ -34,31 +31,22 @@ import { init_bonus, spawn_bonus } from './bonus';
 import { bonus_taken } from './bonus';
 import { update_paddles_size } from './bonus';
 
-console.log("Script is running");
-
 let socket: any;
 
 socket = io.connect("http://localhost:3000", { withCredentials: true });
 
 socket.on("connect", () => {
-  console.log("Successfully connected to the newsocket game ");
+//   console.log("Successfully connected to the newsocket game ");
 });
 
 socket.on("disconnect", () => {
-  console.log("Disconnected to newsocket game ");
+//   console.log("Disconnected to newsocket game ");
 });
 
-const GameMode = localStorage.getItem("mode");
-let UserId = localStorage.getItem("id");
-const DuelId = localStorage.getItem("duel");
-const username = localStorage.getItem("username");
-console.log("mode : " + GameMode + " id : " + UserId + " duel : " + DuelId);
-
 var user_to_watch = "";
-console.log(user_to_watch);
 
-// if (user_to_watch != null) UserId = localStorage.getItem("spect");
-
+//Used to create the arena MUST be changed in back to in order to be accurate
+//Went like this to avoid having no render if back is off
 var config = {
   arena_w: 100,
   arena_w_2: 0,
@@ -71,29 +59,22 @@ var config = {
   paddle_h_2: 0,
 };
 
-socket.on("test", (i: number) => {
-  console.log("front sucesfully called");
-});
-
 config.paddle_h_2 = config.paddle_h / 2;
 config.arena_h_2 = config.arena_h / 2;
 config.arena_w_2 = config.arena_w / 2;
 
-//Request in game players list
 var users_in_game: string [];
 users_in_game = [];
 
 socket.on("send_user_list", (users: any) => {
 	let i: number = 0;
-	console.log("test");
 	if (users != null)
 	{
-			console.log("Users!=null");
 			clear_select(document.getElementById("spectate-select"));
 			add_to_select(document.getElementById("spectate-select"), "", "--Please choose someone to spectate--");
 			while (users[i])
 			{
-				console.log("users : " + users[i]);
+				// console.log("users : " + users[i]);
 				add_to_select(document.getElementById("spectate-select"), users[i], users[i]);
 				users_in_game.push(users[i]);
 				i++;
@@ -105,11 +86,13 @@ socket.on("send_user_list", (users: any) => {
 		users_in_game = [];
 });
 
+//Struct used to save user nickname and desired gamemode
 let buttons = {
 	Nickname: "user",
 	GameMode: 'Normal Game',
 };
 
+//Buttons setup / clic functions
 var join_spec_buttons = document.getElementById("launch_spec");
 
 var join_normal_match = document.getElementById("Normal_Match");
@@ -132,7 +115,7 @@ function launch_spectate()
 
 	if (SpecSelect.options[SpecSelect.selectedIndex].value != "")
 	{
-		console.log("You are willing to watch " + spec_nickname);
+		// console.log("You are willing to watch " + spec_nickname);
 		user_to_watch = spec_nickname;
 		Launch_Game(buttons);
 		document.getElementById("Leave_spec_Btn").style.display = 'block';
@@ -161,7 +144,7 @@ function add_to_select(selectobject: any, value: string, id: string)
 function check_nickname()
 {
 	const nickname = (document.getElementById('nickname')as any).value;
-	console.log(nickname);
+	// console.log(nickname);
 	
 	let i: number = 0;
 
@@ -169,13 +152,11 @@ function check_nickname()
 	{
 		if (nickname == users_in_game[i])
 		{
-			console.log("Nickname Allready Taken...");
+			// console.log("Nickname Allready Taken...");
 			return ("");
 		}
 		i++;
 	}
-	//Verifier si "nickname" est déjà en jeu et SI OUI, ne pas join le matchmaking
-
 	return (nickname);
 };
 
@@ -200,7 +181,7 @@ function launch_normal_matchmaking()
 	const nickname = check_nickname();
 	if (nickname == "")
 	{
-		console.log("Game won't launch");
+		// console.log("Game won't launch");
 		(document.getElementById('nickname')as any).placeholder = "Nickname already taken";
 		(document.getElementById('nickname')as any).value = "";
 		return ;
@@ -217,7 +198,7 @@ function launch_bonus_matchmaking()
 	const nickname = check_nickname();
 	if (nickname == "")
 	{
-		console.log("Game won't launch");
+		// console.log("Game won't launch");
 		(document.getElementById('nickname')as any).placeholder = "Nickname allready taken";
 		(document.getElementById('nickname')as any).value = "";
 		return ;
@@ -367,13 +348,14 @@ const song_btn =
 
 const gui = new GUI();
 
-gui.add( song_btn, 'song_toogle' ).name( 'Toogle song' );
 gui.add( song_btn, 'song', ['Flyday Chinatown', 'Soda City Funk'] ).name('Select Song' );
+gui.add( song_btn, 'song_toogle' ).name( 'Toogle song' );
 
+//Toggle song / change song trigger
 gui.onChange( event =>
 {
-	console.log(song_btn.song_toogle);    // object that was modified
-	console.log(song_btn.song);  // string, name of property
+	// console.log(song_btn.song_toogle);    // object that was modified
+	// console.log(song_btn.song);  // string, name of property
 	if (song_btn.song != song_btn.old_song)
 	{
 		updateCurrentSong(audio_s, song_btn.song_toogle, song_btn.song, true);
@@ -482,13 +464,14 @@ const onKeyUp = function (event: any) {
 document.addEventListener("keydown", onKeyDown);
 document.addEventListener("keyup", onKeyUp);
 
+//Tells back that player wants to launch a game
 function Launch_Game(buttons: any)
 {
 	socket.emit("launch_game", {
 	  spec: user_to_watch,
 	  mode: buttons.GameMode,
 	  nickname: buttons.Nickname,
-	  duel: DuelId,
+	  duel: null, //Not used in standalone version
 	  plx: -(config.arena_w / 2 - 5),
 	  prx: config.arena_w / 2 - 5,
 	  ph_2: config.paddle_h_2,
@@ -540,7 +523,7 @@ socket.on("show_ui", (infos: any) =>
 
 socket.on("hide_loader", (infos: any) =>
 {
-	console.log("hide loader");
+	// console.log("hide loader");
 
 	document.getElementById("Normal_Match").style.cursor = 'default';
 	document.getElementById("Normal_Match").style.opacity = '1';
@@ -552,7 +535,7 @@ socket.on("hide_loader", (infos: any) =>
 
 socket.on("show_loader", (infos: any) =>
 {
-	console.log("show loader");
+	// console.log("show loader");
 
 	document.getElementById("Normal_Match").style.cursor = 'not-allowed';
 	document.getElementById("Normal_Match").style.opacity = '0.6';

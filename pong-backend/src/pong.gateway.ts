@@ -1,16 +1,5 @@
-// import { SerializeOptions } from "@nestjs/common";
-// import { ConfigModule } from "@nestjs/config";
 import { SubscribeMessage, WebSocketGateway, WebSocketServer } from "@nestjs/websockets";
-// import { match } from "assert";
-// import { ColdObservable } from "rxjs/internal/testing/ColdObservable";
 import { Socket, Server } from "socket.io";
-// import { UpdateMatchDTO } from "src/models/match.models";
-// import { Status } from "src/status.enum";
-
-// import { UserService } from "src/user/user.service";
-// import { MatchService } from './match.service';
-
-//Creer une room DE TOUT LES USERS LOG IN pour pouvoir emit la nouvelle liste de gens à spec
 
 var users_in_matchmaking_0 : Socket [];
 var users_in_matchmaking_1 : Socket [];
@@ -22,9 +11,9 @@ const users_id = new Map();
 const users_name = new Map();
 const socket_id = new Map();
 
-const duels = new Map();
-const duels_mode = new Map();
-const duels_waiting_room = new Map();
+// const duels = new Map();
+// const duels_mode = new Map();
+// const duels_waiting_room = new Map();
 
 const room_match_info = new Map();// room / match_infos =
 // {
@@ -46,9 +35,6 @@ const nick_socket = new Map(); // nickname / socket.id
 
 const socket_infos = new Map(); //Socket.id -> infos = {UserStatus, Nickname, room}
 
-
-// room_match_info.get(socket_infos.get(nick_socket.get(config.spec)).room)
-// var nicknames : string [];
 users_in_matchmaking_0 = [];
 users_in_matchmaking_1 = [];
 game_rooms = [];
@@ -79,8 +65,6 @@ let arena_config = {
   arena_config.arena_h_2 = arena_config.arena_h / 2;
   arena_config.arena_w_2 = arena_config.arena_w / 2;
 
-  console.log("arena_config.arena_w = " + arena_config.arena_w);
-
 @WebSocketGateway(
 	{
 		cors: {origin:'http://localhost:8080',
@@ -90,9 +74,6 @@ let arena_config = {
 )
 export class PongGateway
 {
-	// constructor(private MatchService: MatchService,
-	// 			private userService: UserService) {}
-
 	@WebSocketServer()
 	server: Server;
 
@@ -105,7 +86,7 @@ export class PongGateway
 	{
 		this.get_player_list(client);
 
-		console.log (client.id + " has join the server");
+		console.log (client.id + " has joined the server");
 		users_key_status.set(client.id, 0);
 		users_id.set(client.id, -1);
 		user_in_game.set(client.id, -1);
@@ -119,34 +100,25 @@ export class PongGateway
 		let index_of_game_room: number;
 
 		console.log (client.id + " has left the server");
-		// client.leave(client.id);
 		index_of_client_0 = users_in_matchmaking_0.indexOf(client);
 		index_of_client_1 = users_in_matchmaking_1.indexOf(client);
 
 		if (index_of_client_0 != -1)
-		{
 			users_in_matchmaking_0.splice(index_of_client_0, 1);
-			console.log("users in classic matchmaking : " + users_in_matchmaking_0.length);
-		}
 		else if (index_of_client_1 != -1)
-		{
 			users_in_matchmaking_1.splice(index_of_client_1, 1);
-			console.log("users in bonus matchmaking : " + users_in_matchmaking_1.length);
-		}
 		else if (socket_infos.get(client.id))
-		// else if (room_match_info.get(socket_infos.get(client.id).room))//Le joueur était en game
 		{
 			let player_room = socket_infos.get(client.id).room;
 			if (room_match_info.get(player_room) != null)
 			{
-				if (room_match_info.get(player_room).game_done != 1) //Le joeur était en game et elle était en cours
+				if (room_match_info.get(player_room).game_done != 1) //Player was in a running game
 				{
-					//reset user_in_game.set(client.id, -1); pour les DEUX joueurs
+					//reset user_in_game.set(client.id, -1); for both players
 					user_in_game.set(room_match_info.get(player_room).player_0_socket.id, -1);
 					user_in_game.set(room_match_info.get(player_room).player_1_socket.id, -1);
 
-					room_match_info.get(player_room).game_done  = 1;//On met fin à la game
-					console.log("Game socket = " + player_room);
+					room_match_info.get(player_room).game_done  = 1;//End the game
 					room_match_info.get(socket_id.get(users_id.get(client.id)));
 					this.server.to(player_room).emit("User_disconected", socket_nick.get(client.id));
 
@@ -158,11 +130,9 @@ export class PongGateway
 				this.get_player_list(null);
 			}
 		}
-
-		duels.delete(users_id.get(client.id));
-		duels_mode.delete(users_id.get(client.id));
-		duels_waiting_room.delete(users_id.get(client.id));
-
+		// duels.delete(users_id.get(client.id));
+		// duels_mode.delete(users_id.get(client.id));
+		// duels_waiting_room.delete(users_id.get(client.id));
 		users_id.delete(client.id);
 		users_key_status.delete(client.id);
 		users_name.delete(client.id);
@@ -198,7 +168,6 @@ export class PongGateway
 	async leave_spec(client: Socket, user_to_watch)
 	{
 		let spec_sock_id = nick_socket.get(user_to_watch);
-		console.log("spec_sock_id = " + spec_sock_id);
 		client.leave(socket_infos.get(spec_sock_id).room);
 	};
 
@@ -212,9 +181,8 @@ export class PongGateway
 
 		while (game_rooms[i])
 		{
-			if (room_match_info.get(game_rooms[i]).game_done != 1)//Aka la game est toujours en cours
+			if (room_match_info.get(game_rooms[i]).game_done != 1)//the game is still runing
 			{
-				console.log("User in game : " + room_match_info.get(game_rooms[i]).player_0_nick + "  " + room_match_info.get(game_rooms[i]).player_1_nick);
 				users.push(room_match_info.get(game_rooms[i]).player_0_nick);
 				users.push(room_match_info.get(game_rooms[i]).player_1_nick);
 			}
@@ -222,7 +190,6 @@ export class PongGateway
 		}
 
 		this.server.emit("send_user_list", users);
-		// client.emit("send_user_list", users);
 	};
 
 	@SubscribeMessage('send_username')
@@ -252,7 +219,6 @@ export class PongGateway
 	@SubscribeMessage('launch_game')
 	async launch_game(client: Socket, config)
 	{
-		console.log(client.id + " aka " + config.nickname + " trys to launch game, gamemode : " + config.mode);
 		users_id.set(client.id, config.nickname);
 		users_name.set(client.id, config.nickname);
 		socket_id.set(config.nickname, client.id);
@@ -266,31 +232,20 @@ export class PongGateway
 		{
 			console.log(client.id + " is willing to spec " + config.spec);
 			let spec_sock_id = nick_socket.get(config.spec);
-			console.log("spec_sock_id = " + spec_sock_id);
-
-			// client.join(socket_id.get(config.spec));
-			
-			//Check if the user we are willing to spec is still in game
 			client.join(socket_infos.get(spec_sock_id).room);
-
-			// console.log(users_name.get(room_match_info.get(socket_id.get(config.spec))[0].id));
-
-			// room_match_info.get(socket_infos.get(nick_socket.get(config.spec)).room).infoRequise
 			client.emit("hide_ui");
+
 			client.emit("update_usernames", {right_user: room_match_info.get(socket_infos.get(spec_sock_id).room).player_1_nick, left_user:  room_match_info.get(socket_infos.get(spec_sock_id).room).player_0_nick});
-
 			client.emit("update_score", {ls: room_match_info.get(socket_infos.get(spec_sock_id).room).player_0_score, rs: room_match_info.get(socket_infos.get(spec_sock_id).room).player_1_score});
-
-			//Update bonus positions (they actualy don't apear to specs if they join and a bonus is allready spawned)
 			client.emit("update_paddles_size", {lp: room_match_info.get(socket_infos.get(spec_sock_id).room).player_0_paddle_size, rp: room_match_info.get(socket_infos.get(spec_sock_id).room).player_1_paddle_size});
-
 			return ;
 		}
 		
-		duels.set(config.nickname, config.duel);
-		duels_mode.set(config.nickname, config.mode);
-		duels_waiting_room.set(config.nickname, client);
-		//Duels, won't be used
+				//Duels, won't be used
+		// duels.set(config.nickname, config.duel);
+		// duels_mode.set(config.nickname, config.mode);
+		// duels_waiting_room.set(config.nickname, client);
+		/*
 		if (config.duel != null)
 		{
 			var duel_game_mode = 0;
@@ -331,23 +286,28 @@ export class PongGateway
 				console.log("Waiting for the other player...");
 			}
 		}
+		*/
 
 		//Matchmaking
 		else
 		{
+			console.log(client.id + " aka " + config.nickname + " trys to launch game, gamemode : " + config.mode);
 			client.emit("show_loader");
 			if (config.mode == 'Normal Game')
 			{
-				console.log("User joined normal Matchmaking");
+				console.log(client.id + " joined normal Matchmaking");
 				users_in_matchmaking_0.push(client);
 			}
 			else
+			{
+				console.log(client.id + " joined bonus Matchmaking");
 				users_in_matchmaking_1.push(client);
+			}
 			if (users_in_matchmaking_0.length >= 2) // Classic game
 			{
-				if (users_in_matchmaking_0[0].id == users_in_matchmaking_0[1].id || user_in_game.get(client.id) != -1)
+				if (users_in_matchmaking_0[0].id == users_in_matchmaking_0[1].id || user_in_game.get(client.id) != -1)//Impossible in theory
 				{
-					console.log("User allready registered !");
+					console.log("User" + client.id + " allready registered !");
 					users_in_matchmaking_0.pop();
 					return ;
 				}
@@ -359,9 +319,6 @@ export class PongGateway
 				players[1] = client;
 
 				users_in_matchmaking_0 = [];
-
-				console.log(users_in_matchmaking_0.length);
-
 				console.log("2 Users are looking for a Classic game");
 
 				players[0].join(players[0].id);
@@ -374,7 +331,7 @@ export class PongGateway
 			{
 				if (users_in_matchmaking_1[0].id == users_in_matchmaking_1[1].id || user_in_game.get(client.id) != -1)
 				{
-					console.log("User allready registered !");
+					console.log("User" + client.id + " allready registered !");
 					users_in_matchmaking_1.pop();
 					return ;
 				}
@@ -386,9 +343,6 @@ export class PongGateway
 				players[1] = client;
 
 				users_in_matchmaking_1 = [];
-
-				console.log(users_in_matchmaking_1.length);
-
 				console.log("2 Users are looking for a Bonus game");
 
 				players[0].join(players[0].id);
@@ -402,11 +356,13 @@ export class PongGateway
 		{
 			if (config.mode == 'Normal Game')
 			{
+				console.log("launching a classic game");
 				user_in_game.set(players[0].id, 0);
 				user_in_game.set(players[1].id, 0);
 			}
 			else
 			{
+				console.log("launching a bonus game");
 				user_in_game.set(players[0].id, 1);
 				user_in_game.set(players[1].id, 1);				
 			}
@@ -453,12 +409,6 @@ export class PongGateway
 
 			this.get_player_list(null);
 			this.server.to(players[0].id).emit("update_score", {ls: 0, rs: 0});
-			// this.server.emit(upda);
-
-			// match_info.push(users_name.get(players[0].id), users_name.get(players[1].id), 0, 0, players[0], players[1],
-			// users_id.get(players[0].id), users_id.get(players[1].id), launch_game, 0, 0, 0);
-			// room_match_info.set(players[0].id, match_infos);
-
 			var positions = 
 			{
 				paddle_l_pos_z : 0,
@@ -501,8 +451,6 @@ export class PongGateway
 			positions.bonus_counter = getRandomInt(500, 1000);
 
 			let win = -1;
-			//CHANGE SCORE LIMIT HERE
-
 			while (win == -1 && match_infos.game_done != 1)// != 1 pour terminer le match
 			{
 				await sleep(10);
@@ -566,7 +514,6 @@ export class PongGateway
 							positions.bonus_counter = getRandomInt(500, 1000);
 							positions.bonus_state = 1;
 							positions.bonus_type = getRandomInt(0, 10);
-							console.log("Bonus type = " + positions.bonus_type);
 							positions.bonus_pos_x = getRandomInt(-positions.arena_right_pos_2, positions.arena_right_pos_2);
 							positions.bonus_pos_z = getRandomInt(-positions.arena_bot_pos_2, positions.arena_bot_pos_2);
 							// positions.bonus_pos_z = 0;//Debug
@@ -607,7 +554,6 @@ export class PongGateway
 						positions.bonus_counter = getRandomInt(500, 1000);
 						positions.bonus_state = 1;
 						positions.bonus_type = getRandomInt(0, 10);
-						console.log("Bonus type = " + positions.bonus_type);
 						positions.bonus_pos_x = getRandomInt(-positions.arena_right_pos_2, positions.arena_right_pos_2);
 						positions.bonus_pos_z = getRandomInt(-positions.arena_bot_pos_2, positions.arena_bot_pos_2);
 						// positions.bonus_pos_z = 0;//Debug
@@ -687,18 +633,10 @@ export class PongGateway
 			if (match_infos.game_done != 1)//Quelqu'un a GAGNÉ LE MATCH
 			{
 				match_infos.game_done  = 1;
-				let win_0 = false;
-				let win_1 = false;
 				if (win == 0)
-				{
-					win_0 = true;
 					this.server.to(players[0].id).emit("End_of_match", {name: socket_nick.get(players[0].id), pos: "left"});
-				}
 				else
-				{
-					win_1 = true;
 					this.server.to(players[0].id).emit("End_of_match", {name: socket_nick.get(players[1].id), pos : "right"});
-				}
 
 				let index_of_game_room: number;
 				index_of_game_room = game_rooms.indexOf(players[0].id);
@@ -708,12 +646,7 @@ export class PongGateway
 				user_in_game.set(players[0].id, -1);
 				user_in_game.set(players[1].id, -1);
 				this.get_player_list(null);
-				// let return_tab: UpdateMatchDTO = {winner_0: win_0, points_0: positions.LeftScore, userId_0: users_id.get(players[0].id),
-				// winner_1 : win_1, points_1: positions.RightScore, userId_1: users_id.get(players[1].id), game_mode: config.mode};
-
-				// this.MatchService.createMatch(return_tab);
 			}
-			// console.log(await this.MatchService.getMatchsOfUser(users_id.get(players[1].id)));
 		}
 	};
 };

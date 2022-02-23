@@ -83,9 +83,6 @@ async function setFirework_pos(scene: THREE.Scene, fireworks:  THREE.Points, fir
 
 export function launchFirework(scene: THREE.Scene, x: number, y: number, z: number, elevation: number, size: number, fireworks_color: THREE.ColorRepresentation)
 {
-	// const firework_v = [];
-
-	// firework_v.push(x, y, z);
 	const firework_geo = new THREE.BufferGeometry();
 	var firework_pos = new Float32Array( size * 3 );
 	firework_geo.setAttribute( 'position', new THREE.BufferAttribute( firework_pos, 3 ) );
@@ -95,10 +92,6 @@ export function launchFirework(scene: THREE.Scene, x: number, y: number, z: numb
 
 	scene.add(fireworks);
 	setFirework_pos(scene, fireworks, firework_geo, firework_m, size, x, y, z, elevation);
-
-
-	// while (fireworks[0].position.x < x + 20)
-	// 	fireworks[0].position.x += 0.05;
 }
 
 export async function ft_ending_fireworks(pos: any, color: any, ball_s: any, paddles_s: any, scene: any) {
@@ -115,7 +108,8 @@ export async function ft_ending_fireworks(pos: any, color: any, ball_s: any, pad
 	let rdX: number;
 	let rdZ: number;
   
-	while (lauch_end_fireworks == true) {
+	while (lauch_end_fireworks == true)
+	{
 	  rdX = getRandomInt(-60, 60);
 	  rdZ = getRandomInt(-30, 40);
 	  launchFirework(scene, rdX, 0, rdZ, 20, 25, color);
