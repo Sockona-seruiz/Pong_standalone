@@ -6,7 +6,8 @@ body {
   .ui {
 	position: absolute;
   }
-  
+
+
   button{
 	background-color: white;
 	color: black;
@@ -123,15 +124,13 @@ body {
 		0% { transform: rotate(0deg); }
 		100% { transform: rotate(360deg); }
 	  }
-  /* div.Nick_Matchmaking
-  {
-    display: block;
-    text-align: center;
-}
-Nick_Matchmaking
-{
-    display: inline-block;
-    margin-left: auto;
-    margin-right: auto;
-    text-align: left;
-  } */
+
+	  
+	  .ahref {
+		position: absolute;
+		  width: 42px;
+		  height: 42px;
+		  bottom:1%;
+		  right: 1%;
+	  }
+	  
