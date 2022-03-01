@@ -1,0 +1,11 @@
+FROM node
+
+WORKDIR /pong-frontend
+COPY package*.json /pong-frontend/
+
+RUN npm install
+
+COPY . /pong-frontend/
+EXPOSE 8080
+WORKDIR /pong-frontend
+CMD ["/bin/sh", "entrypoint.sh"]

@@ -1,0 +1,15 @@
+version: "3"
+services:
+    pong-backend:
+        container_name:  pong-backend
+        restart: always
+        build: ./pong-backend
+        ports:
+            - "3000:3000"
+
+    pong-frontend:
+        container_name:  pong-frontend
+        restart: always
+        build: ./pong-frontend
+        ports:
+            - "8080:8080"

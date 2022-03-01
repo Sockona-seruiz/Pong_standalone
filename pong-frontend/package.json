@@ -4,17 +4,18 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "http-server"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@seregpie/three.text-sprite": "^3.2.0",
     "@types/three": "^0.135.0",
+    "http-server": "^14.1.0",
     "socket.io-client": "^4.4.1",
     "three": "^0.135.0",
-    "ts-loader": "^9.2.6",
-    "yarn": "^1.22.17"
+    "ts-loader": "^9.2.6"
   },
   "devDependencies": {
     "webpack-cli": "^4.9.2"

@@ -1,0 +1,11 @@
+FROM node
+
+WORKDIR /pong-backend
+COPY package*.json /pong-backend/
+
+RUN npm install
+
+COPY . /pong-backend/
+EXPOSE 3000
+
+CMD [ "npm", "start"]

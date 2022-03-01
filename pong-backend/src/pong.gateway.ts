@@ -453,7 +453,7 @@ export class PongGateway
 			let win = -1;
 			while (win == -1 && match_infos.game_done != 1)// != 1 pour terminer le match
 			{
-				await sleep(10);
+				// await sleep(10);
 				positions.bonus_counter--;
 				//Update paddle pos according to players imput
 				if (users_key_status.get(players[1].id) == 1 && positions.paddle_r_pos_z - positions.paddle_r_h_2  > positions.arena_top_pos + 0.1)
