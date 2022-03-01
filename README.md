@@ -11,4 +11,4 @@ Then go to ```http://localhost:8080/``` and choose your nickname.
 
 Use 'W' and 'S' to play !
 
-![myfile](https://media.giphy.com/media/4X7ZznCgOgyCbaGotF/giphy-downsized-large.gif)
+![Alt Text](https://media.giphy.com/media/vFKqnCdLPNOKc/giphy.gif)
