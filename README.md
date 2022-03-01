@@ -11,4 +11,4 @@ Then go to ```http://localhost:8080/``` and choose your nickname.
 
 Use 'W' and 'S' to play !
 
-![Pong gif](./showcase.gif)
+![Pong gif](./Pong.gif)
