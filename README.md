@@ -1,6 +1,6 @@
 # Pong_standalone
 
-A standalone version of my 3D online pvp Pong.
+A standalone version of my 3D online pvp Pong using Nestjs (backend) and socket.io !
 
 It includes online pvp with matchmaking and 2 game modes.
 Also lets you spectate other players.
