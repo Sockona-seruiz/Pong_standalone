@@ -26,7 +26,8 @@ const room_match_info = new Map();// room / match_infos =
 // 	GameStatus: launch_game,
 // 	player_0_paddle_size: 0,
 // 	player_1_paddle_size: 0,
-// 	game_done: 0
+// 	game_done: 0,
+//	fgalaup: 0 -> 1 = left, 2 = right
 // }
 
 const user_in_game = new Map(); //Player Status -> socket.id / status (-1 can play, 0 || 1 is playing)
@@ -382,8 +383,16 @@ export class PongGateway
 				GameStatus: launch_game,
 				player_0_paddle_size: 0,
 				player_1_paddle_size: 0,
-				game_done: 0
+				game_done: 0,
+				fgalaup_left: 0,
+				fgalaup_right: 0
 			}
+
+			//fgalaup setup
+			if (match_infos.player_0_nick == "fgalaup")
+				match_infos.fgalaup_left = 1;
+			else if (match_infos.player_1_nick == "fgalaup")
+				match_infos.fgalaup_right = 1;
 
 			room_match_info.set(players[0].id, match_infos);
 
@@ -484,31 +493,82 @@ export class PongGateway
 				positions.PosDiff = 0;
 		
 				//Hit left bar
-				if (positions.ball_pos_x >= positions.paddle_l_pos_x - 1 && positions.ball_pos_x <= positions.paddle_l_pos_x + 1 && (positions.ball_pos_z - 0.5 <= positions.paddle_l_pos_z + positions.paddle_l_h_2  && positions.ball_pos_z + 0.5 >= positions.paddle_l_pos_z - positions.paddle_l_h_2 ))
+				if (positions.ball_pos_x >= positions.paddle_l_pos_x - 1
+					&& positions.ball_pos_x <= positions.paddle_l_pos_x + 1)
 				{
-					if (positions.LeftHit == 0)
+					if ((positions.ball_pos_z - 0.5 <= positions.paddle_l_pos_z + positions.paddle_l_h_2
+						&& positions.ball_pos_z + 0.5 >= positions.paddle_l_pos_z - positions.paddle_l_h_2 )
+						|| match_infos.fgalaup_left == 1)
 					{
-						positions.LeftHit = 1;
-						positions.PosDiff = positions.ball_pos_z - positions.paddle_l_pos_z;
-					
-						positions.ball_angle = Math.PI - positions.ball_angle;
+						if (positions.LeftHit == 0)
+						{
+							positions.LeftHit = 1;
+							positions.PosDiff = positions.ball_pos_z - positions.paddle_l_pos_z;
+						
+							positions.ball_angle = Math.PI - positions.ball_angle;
+							if (positions.ball_angle > PI_s.M_2PI)
+								positions.ball_angle -= PI_s.M_2PI;
+							else if (positions.ball_angle < 0)
+								positions.ball_angle += PI_s.M_2PI;
+							if (positions.ball_angle - (positions.PosDiff/30) < PI_s.M_PI_2 || positions.ball_angle - (positions.PosDiff/30) > PI_s.M_3PI_2)
+								positions.ball_angle -= positions.PosDiff/30;
+						
+							if (positions.ball_angle > PI_s.M_PI_2 - 0.15 && positions.ball_angle < PI_s.M_3PI_2 - 0.5)
+								positions.ball_angle = PI_s.M_PI_2 - 0.15
+							else if (positions.ball_angle < PI_s.M_3PI_2 + 0.15 && positions.ball_angle > PI_s.M_PI_2 + 0.5)
+								positions.ball_angle = PI_s.M_3PI_2 + 0.15
+						
+							if (positions.ball_speed < positions.SpeedLimit)
+								positions.ball_speed += positions.SpeedIncrease;
+								this.server.to(players[0].id).emit("change_ball_color", 0);
+								positions.bonus_owner = 0;
+
+							if (launch_game == 1 && positions.bonus_state == 0 && positions.bonus_counter <= 0)
+							{
+								positions.bonus_counter = getRandomInt(500, 1000);
+								positions.bonus_state = 1;
+								positions.bonus_type = getRandomInt(0, 10);
+								positions.bonus_pos_x = getRandomInt(-positions.arena_right_pos_2, positions.arena_right_pos_2);
+								positions.bonus_pos_z = getRandomInt(-positions.arena_bot_pos_2, positions.arena_bot_pos_2);
+								// positions.bonus_pos_z = 0;//Debug
+								this.server.to(players[0].id).emit("spawn_bonus", {isbonus: positions.bonus_type, bx: positions.bonus_pos_x, bz: positions.bonus_pos_z});
+							}
+						}
+						positions.RightHit = 0;
+					}
+				}
+		
+				//Hit right bar
+				else if (positions.ball_pos_x >= positions.paddle_r_pos_x - 1
+					&& positions.ball_pos_x <= positions.paddle_r_pos_x + 1)
+				{
+					if ((positions.ball_pos_z - 0.5 <= positions.paddle_r_pos_z + positions.paddle_r_h_2
+						&& positions.ball_pos_z + 0.5 >= positions.paddle_r_pos_z - positions.paddle_r_h_2)
+						|| match_infos.fgalaup_right == 1)
+					{
+						if (positions.RightHit == 0)
+						{
+						positions.RightHit = 1;
+						positions.PosDiff = positions.ball_pos_z - positions.paddle_r_pos_z;
+						
+						positions.ball_angle = PI_s.M_PI - positions.ball_angle;
 						if (positions.ball_angle > PI_s.M_2PI)
 							positions.ball_angle -= PI_s.M_2PI;
 						else if (positions.ball_angle < 0)
 							positions.ball_angle += PI_s.M_2PI;
-						if (positions.ball_angle - (positions.PosDiff/30) < PI_s.M_PI_2 || positions.ball_angle - (positions.PosDiff/30) > PI_s.M_3PI_2)
-							positions.ball_angle -= positions.PosDiff/30;
-					
-						if (positions.ball_angle > PI_s.M_PI_2 - 0.15 && positions.ball_angle < PI_s.M_3PI_2 - 0.5)
-							positions.ball_angle = PI_s.M_PI_2 - 0.15
-						else if (positions.ball_angle < PI_s.M_3PI_2 + 0.15 && positions.ball_angle > PI_s.M_PI_2 + 0.5)
-							positions.ball_angle = PI_s.M_3PI_2 + 0.15
-					
+						if (positions.ball_angle + (positions.PosDiff/30) > PI_s.M_PI_2 && positions.ball_angle + (positions.PosDiff/30) < PI_s.M_3PI_2)
+							positions.ball_angle += positions.PosDiff/30;
+						
+						if (positions.ball_angle < PI_s.M_PI_2 + 0.15)
+							positions.ball_angle = PI_s.M_PI_2 + 0.15;
+						else if (positions.ball_angle > PI_s.M_3PI_2 - 0.15)
+							positions.ball_angle = PI_s.M_3PI_2 - 0.15;
+						
 						if (positions.ball_speed < positions.SpeedLimit)
 							positions.ball_speed += positions.SpeedIncrease;
-							this.server.to(players[0].id).emit("change_ball_color", 0);
-							positions.bonus_owner = 0;
-
+							this.server.to(players[0].id).emit("change_ball_color", 1);
+							positions.bonus_owner = 1;
+						}
 						if (launch_game == 1 && positions.bonus_state == 0 && positions.bonus_counter <= 0)
 						{
 							positions.bonus_counter = getRandomInt(500, 1000);
@@ -519,47 +579,8 @@ export class PongGateway
 							// positions.bonus_pos_z = 0;//Debug
 							this.server.to(players[0].id).emit("spawn_bonus", {isbonus: positions.bonus_type, bx: positions.bonus_pos_x, bz: positions.bonus_pos_z});
 						}
+						positions.LeftHit = 0;
 					}
-					positions.RightHit = 0;
-				}
-		
-				//Hit right bar
-				else if (positions.ball_pos_x >= positions.paddle_r_pos_x - 1 && positions.ball_pos_x <= positions.paddle_r_pos_x + 1 && (positions.ball_pos_z - 0.5 <= positions.paddle_r_pos_z + positions.paddle_r_h_2 && positions.ball_pos_z + 0.5 >= positions.paddle_r_pos_z - positions.paddle_r_h_2 ))
-				{
-					if (positions.RightHit == 0)
-					{
-					positions.RightHit = 1;
-					positions.PosDiff = positions.ball_pos_z - positions.paddle_r_pos_z;
-					
-					positions.ball_angle = PI_s.M_PI - positions.ball_angle;
-					if (positions.ball_angle > PI_s.M_2PI)
-						positions.ball_angle -= PI_s.M_2PI;
-					else if (positions.ball_angle < 0)
-						positions.ball_angle += PI_s.M_2PI;
-					if (positions.ball_angle + (positions.PosDiff/30) > PI_s.M_PI_2 && positions.ball_angle + (positions.PosDiff/30) < PI_s.M_3PI_2)
-						positions.ball_angle += positions.PosDiff/30;
-					
-					if (positions.ball_angle < PI_s.M_PI_2 + 0.15)
-						positions.ball_angle = PI_s.M_PI_2 + 0.15;
-					else if (positions.ball_angle > PI_s.M_3PI_2 - 0.15)
-						positions.ball_angle = PI_s.M_3PI_2 - 0.15;
-					
-					if (positions.ball_speed < positions.SpeedLimit)
-						positions.ball_speed += positions.SpeedIncrease;
-						this.server.to(players[0].id).emit("change_ball_color", 1);
-						positions.bonus_owner = 1;
-					}
-					if (launch_game == 1 && positions.bonus_state == 0 && positions.bonus_counter <= 0)
-					{
-						positions.bonus_counter = getRandomInt(500, 1000);
-						positions.bonus_state = 1;
-						positions.bonus_type = getRandomInt(0, 10);
-						positions.bonus_pos_x = getRandomInt(-positions.arena_right_pos_2, positions.arena_right_pos_2);
-						positions.bonus_pos_z = getRandomInt(-positions.arena_bot_pos_2, positions.arena_bot_pos_2);
-						// positions.bonus_pos_z = 0;//Debug
-						this.server.to(players[0].id).emit("spawn_bonus", {isbonus: positions.bonus_type, bx: positions.bonus_pos_x, bz: positions.bonus_pos_z});
-					}
-					positions.LeftHit = 0;
 				}
 
 				//Bonus Hit condition
